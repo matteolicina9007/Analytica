@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderLibrary();
   updatePreview();
+  restoreResellerAccess();
 });
 
 // ── NAVIGATION ─────────────────────────────────────────────
@@ -763,6 +764,33 @@ async function exportFullReport() {
     pdf.save('archiva-rapport.pdf'); showNotif('✓ PDF téléchargé');
   } catch { showNotif('Erreur export.'); }
   finally { document.body.removeChild(wrapper); }
+}
+
+// ── REVENDEUR — MOT DE PASSE ───────────────────────────────
+const RESELLER_PASSWORD = 'Archiva2025!'; // ← changez ce mot de passe ici
+
+function checkResellerPassword() {
+  const input = document.getElementById('resellerPasswordInput').value;
+  const error = document.getElementById('resellerPasswordError');
+  if (input === RESELLER_PASSWORD) {
+    document.getElementById('resellerGate').style.display    = 'none';
+    document.getElementById('resellerContent').style.display = 'block';
+    sessionStorage.setItem('archiva_reseller', '1');
+  } else {
+    error.style.display = 'block';
+    document.getElementById('resellerPasswordInput').value = '';
+    document.getElementById('resellerPasswordInput').focus();
+  }
+}
+
+// Restaure l'accès si déjà authentifié dans cette session
+function restoreResellerAccess() {
+  if (sessionStorage.getItem('archiva_reseller') === '1') {
+    const gate    = document.getElementById('resellerGate');
+    const content = document.getElementById('resellerContent');
+    if (gate)    gate.style.display    = 'none';
+    if (content) content.style.display = 'block';
+  }
 }
 
 // ── REVENDEUR — CONFIGURATEUR ──────────────────────────────

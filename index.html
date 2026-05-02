@@ -560,9 +560,32 @@
     <div class="reseller-intro">
       <div class="sec-label" style="margin:0 auto 1.25rem"><span class="dot"></span>Marque Blanche</div>
       <h1>Créez votre site <span class="gradient-text">en marque blanche</span></h1>
-      <p>Personnalisez Archiva avec votre propre identité visuelle et téléchargez votre site prêt à l'emploi en quelques minutes.</p>
+      <p>Espace réservé aux revendeurs autorisés. Entrez votre mot de passe pour accéder au configurateur.</p>
     </div>
 
+    <!-- ÉCRAN MOT DE PASSE -->
+    <div id="resellerGate" style="max-width:440px;margin:0 auto 3rem">
+      <div class="panel-box" style="text-align:center">
+        <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
+        <h3 style="margin-bottom:.5rem">Accès revendeur</h3>
+        <p style="font-size:.875rem;margin-bottom:1.75rem">Saisissez le mot de passe fourni par A.E.L. Corporation pour accéder au configurateur.</p>
+        <div style="display:flex;gap:.6rem">
+          <input type="password" class="form-input" id="resellerPasswordInput"
+            placeholder="Mot de passe revendeur…"
+            onkeydown="if(event.key==='Enter')checkResellerPassword()">
+          <button class="btn btn-primary" onclick="checkResellerPassword()">Accéder</button>
+        </div>
+        <div id="resellerPasswordError" style="display:none;margin-top:.75rem;font-size:.82rem;color:var(--red)">
+          ✗ Mot de passe incorrect. Contactez a.e.l.corporation@hotmail.com
+        </div>
+        <p style="font-size:.77rem;color:var(--t500);margin-top:1.25rem">
+          Pas encore revendeur ? <a onclick="showPage('contact')" style="color:var(--orange2);cursor:pointer">Contactez-nous →</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- CONFIGURATEUR (masqué jusqu'au bon mot de passe) -->
+    <div id="resellerContent" style="display:none">
     <div class="reseller-grid">
       <!-- PANNEAU DE CONFIGURATION -->
       <div class="config-panel">
@@ -661,6 +684,8 @@
         </div>
       </div>
     </div>
+  </div>
+    </div><!-- /resellerContent -->
   </div>
 </div><!-- /page-reseller -->
 
