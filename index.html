@@ -3,1405 +3,1406 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Archiva — La plateforme SaaS de traitement documentaire IA pour entreprises. Générez, analysez et gérez tous vos documents professionnels avec Claude ou Mistral AI.">
+  <title>Archiva — Intelligence Documentaire pour Entreprises</title>
+  <meta name="description" content="Archiva transforme vos documents d'entreprise en intelligence actionnable. Génération, extraction, analyse, email et stockage cloud — propulsés par l'IA.">
   <meta name="robots" content="index, follow">
-  <meta name="author" content="A.E.L. Corporation">
-  <title>Archiva — Gestion Documentaire IA pour Entreprises</title>
+  <link rel="canonical" href="https://archiva.app/">
+  <meta property="og:title" content="Archiva — Intelligence Documentaire">
+  <meta property="og:description" content="Générez, analysez et gérez tous vos documents professionnels avec l'IA.">
+  <meta property="og:type" content="website">
 
-  <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-  <!-- Libs -->
-  <link rel="stylesheet" href="styles.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <script>
-    var script = document.createElement('script');
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
-    script.onload = function() {
-      var pdfjsLib = window['pdfjs-dist/build/pdf'];
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-      window.pdfjsLib = pdfjsLib;
-    };
-    document.head.appendChild(script);
-  </script>
+
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-<!-- ===== COOKIE BANNER ===== -->
-<div id="cookie-banner" class="cookie-banner" role="dialog" aria-label="Consentement cookies">
-  <div class="cookie-inner">
-    <div class="cookie-text">
-      <div class="cookie-title">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Archiva respecte votre vie privée
-      </div>
-      <p>Nous utilisons uniquement des cookies essentiels. Vos fichiers et clés API ne transitent jamais par nos serveurs. <a href="#" onclick="showModal('privacy');return false;">En savoir plus</a></p>
-    </div>
-    <div class="cookie-actions">
-      <button class="btn-cookie-customize" onclick="showModal('cookies')">Personnaliser</button>
-      <button class="btn-cookie-reject" onclick="rejectCookies()">Refuser</button>
-      <button class="btn-cookie-accept" onclick="acceptCookies()">Accepter</button>
-    </div>
-  </div>
-</div>
-
-<!-- ===== NAVIGATION ===== -->
-<nav id="navbar" class="navbar" role="navigation" aria-label="Navigation principale">
-  <div class="nav-container">
-    <div class="nav-logo" onclick="showPage('home')" role="button" tabindex="0" aria-label="Archiva — Accueil">
-      <div class="logo-mark">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5">
-          <path d="M21 8v13H3V8"/>
-          <path d="M23 3H1v5h22V3z"/>
-          <path d="M10 12h4"/>
+<!-- ══════════════════════════════════════
+     NAVBAR
+══════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <div class="nav-logo" onclick="showPage('home')">
+      <div class="logo-icon">
+        <svg width="20" height="20" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+          <line x1="16" y1="13" x2="8" y2="13"/>
+          <line x1="16" y1="17" x2="8" y2="17"/>
         </svg>
       </div>
-      <span class="logo-text">Archiva</span>
+      <span class="logo-name">Archiva</span>
     </div>
 
-    <div class="nav-links" id="nav-links">
-      <a class="nav-link" id="nl-home"    onclick="showPage('home')"    tabindex="0">Accueil</a>
-      <a class="nav-link" id="nl-ai"      onclick="showPage('ai')"      tabindex="0">Espace IA</a>
-      <a class="nav-link" id="nl-pricing" onclick="showPage('pricing')" tabindex="0">Tarifs</a>
-      <a class="nav-link" id="nl-contact" onclick="showPage('contact')" tabindex="0">Contact</a>
+    <div class="nav-links">
+      <span class="nav-link active" data-page="home" onclick="showPage('home')">Accueil</span>
+      <span class="nav-link" data-page="ai" onclick="showPage('ai')">Espace IA</span>
+      <span class="nav-link" data-page="pricing" onclick="showPage('pricing')">Tarifs</span>
+      <span class="nav-link" data-page="contact" onclick="showPage('contact')">Contact</span>
     </div>
 
     <div class="nav-right">
-      <button class="btn-nav-cta" onclick="showPage('ai')">Commencer gratuitement</button>
-      <button class="hamburger" id="hamburger" onclick="toggleMenu()" aria-label="Menu" aria-expanded="false">
-        <span></span><span></span><span></span>
-      </button>
+      <button class="btn btn-ghost btn-sm" onclick="showPage('ai')">Se connecter</button>
+      <button class="btn nav-cta" onclick="showPage('pricing')">Essai gratuit</button>
     </div>
+
+    <button class="hamburger" id="hamburger" onclick="toggleMobile()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
-  <div class="mobile-menu" id="mobile-menu">
-    <a class="mobile-link" onclick="showPage('home');toggleMenu()">Accueil</a>
-    <a class="mobile-link" onclick="showPage('ai');toggleMenu()">Espace IA</a>
-    <a class="mobile-link" onclick="showPage('pricing');toggleMenu()">Tarifs</a>
-    <a class="mobile-link" onclick="showPage('contact');toggleMenu()">Contact</a>
-    <button class="btn-nav-cta mobile-cta" onclick="showPage('ai');toggleMenu()">Commencer gratuitement</button>
+
+  <div class="mobile-nav" id="mobileNav">
+    <span class="mobile-link" onclick="showPage('home');toggleMobile()">Accueil</span>
+    <span class="mobile-link" onclick="showPage('ai');toggleMobile()">Espace IA</span>
+    <span class="mobile-link" onclick="showPage('pricing');toggleMobile()">Tarifs</span>
+    <span class="mobile-link" onclick="showPage('contact');toggleMobile()">Contact</span>
+    <button class="btn btn-primary btn-full mobile-cta" onclick="showPage('pricing');toggleMobile()">Essai gratuit</button>
   </div>
 </nav>
 
-<!-- =================================================================
-     PAGE ACCUEIL
-================================================================= -->
-<div id="page-home" class="page active">
+
+<!-- ══════════════════════════════════════
+     PAGE : ACCUEIL
+══════════════════════════════════════ -->
+<div class="page active" id="page-home">
 
   <!-- HERO -->
   <section class="hero">
-    <div class="hero-bg"></div>
-    <div class="hero-grid"></div>
-    <div class="hero-container">
+    <div class="hero-blobs">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+    </div>
+    <div class="hero-grid-bg"></div>
 
+    <div class="hero-inner">
+      <!-- Texte gauche -->
       <div class="hero-content">
         <div class="hero-badge">
-          <span class="badge-dot"></span>
+          <span class="pulse"></span>
           Propulsé par Claude &amp; Mistral AI
         </div>
         <h1 class="hero-title">
-          Gérez vos documents<br>d'entreprise avec l'<span class="gradient-text">IA</span>
+          L'intelligence<br>
+          <span class="gradient-text">documentaire</span><br>
+          pour votre entreprise
         </h1>
-        <p class="hero-subtitle">
-          Archiva centralise la génération, l'extraction, l'analyse de documents et la gestion de vos outils métiers en un seul espace intelligent.
+        <p class="hero-sub">
+          Générez, analysez et gérez tous vos documents professionnels en quelques secondes.
+          Extraction de données, rapports visuels, email &amp; cloud — tout en un.
         </p>
-        <div class="hero-btns">
-          <button class="btn-primary btn-lg" onclick="showPage('ai')">
+        <div class="hero-actions">
+          <button class="btn btn-primary btn-lg" onclick="showPage('ai')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
             Démarrer gratuitement
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
-          <button class="btn-ghost btn-lg" onclick="showPage('pricing')">Voir les tarifs</button>
+          <button class="btn btn-ghost btn-lg" onclick="showPage('pricing')">
+            Voir les tarifs
+            <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="9 18 15 12 9 6"/>
+            </svg>
+          </button>
         </div>
-        <div class="hero-stats">
-          <div class="stat-item">
-            <div class="stat-number">5</div>
-            <div class="stat-label">Fonctionnalités IA</div>
-          </div>
-          <div class="stat-sep"></div>
-          <div class="stat-item">
-            <div class="stat-number">2</div>
-            <div class="stat-label">Modèles IA supportés</div>
-          </div>
-          <div class="stat-sep"></div>
-          <div class="stat-item">
-            <div class="stat-number">100%</div>
-            <div class="stat-label">Données privées</div>
-          </div>
-          <div class="stat-sep"></div>
-          <div class="stat-item">
-            <div class="stat-number">RGPD</div>
-            <div class="stat-label">Conforme</div>
-          </div>
+        <div class="hero-trust">
+          <span><span class="check">✓</span> Sans carte bancaire</span>
+          <span><span class="check">✓</span> RGPD conforme</span>
+          <span><span class="check">✓</span> Annulation libre</span>
         </div>
       </div>
 
+      <!-- Visuel 3D droite -->
       <div class="hero-visual">
-        <div class="particles">
-          <div class="ptcl ptcl-1"></div><div class="ptcl ptcl-2"></div>
-          <div class="ptcl ptcl-3"></div><div class="ptcl ptcl-4"></div>
-          <div class="ptcl ptcl-5"></div><div class="ptcl ptcl-6"></div>
-        </div>
-        <div class="scene3d">
-          <div class="s3d-main">
-            <div class="s3d-topbar">
-              <div class="s3d-dots">
-                <span class="s3d-dot r"></span>
-                <span class="s3d-dot y"></span>
-                <span class="s3d-dot g"></span>
+        <div class="hero-card-wrap">
+          <div class="hero-card">
+            <div class="hc-header">
+              <div class="hc-dots">
+                <div class="hc-dot r"></div>
+                <div class="hc-dot y"></div>
+                <div class="hc-dot g"></div>
               </div>
-              <span class="s3d-title">Archiva · Rapport Q4 2025</span>
+              <span class="hc-title">Archiva — Tableau de bord IA</span>
             </div>
-            <div class="s3d-bar-row">
-              <div class="s3d-bar" style="--bh:52%"><div class="s3d-bar-fill"></div><span>Jan</span></div>
-              <div class="s3d-bar" style="--bh:68%"><div class="s3d-bar-fill"></div><span>Fév</span></div>
-              <div class="s3d-bar" style="--bh:44%"><div class="s3d-bar-fill"></div><span>Mar</span></div>
-              <div class="s3d-bar" style="--bh:85%"><div class="s3d-bar-fill"></div><span>Avr</span></div>
-              <div class="s3d-bar" style="--bh:62%"><div class="s3d-bar-fill"></div><span>Mai</span></div>
-              <div class="s3d-bar" style="--bh:97%"><div class="s3d-bar-fill accent"></div><span>Juin</span></div>
-            </div>
-            <div class="s3d-line">
-              <svg viewBox="0 0 200 50" fill="none" preserveAspectRatio="none">
-                <defs>
-                  <linearGradient id="lg1" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stop-color="#f97316" stop-opacity=".35"/>
-                    <stop offset="100%" stop-color="#f97316" stop-opacity="0"/>
-                  </linearGradient>
-                </defs>
-                <path d="M0,45 L33,34 L66,38 L100,22 L133,14 L166,7 L200,2" stroke="#f97316" stroke-width="2" stroke-linecap="round"/>
-                <path d="M0,45 L33,34 L66,38 L100,22 L133,14 L166,7 L200,2 L200,50 L0,50Z" fill="url(#lg1)"/>
-              </svg>
-            </div>
-            <div class="s3d-label">Analyse IA • <span>+28% croissance</span></div>
-          </div>
 
-          <div class="s3d-badge top-right">
-            <div class="badge-icon">📄</div>
-            <div class="badge-val">142</div>
-            <div class="badge-lbl">Documents générés</div>
+            <div class="hc-metric-row">
+              <div class="hc-metric">
+                <span class="val">2 847</span>
+                <span class="lbl">Documents traités</span>
+                <span class="up">↑ +12% ce mois</span>
+              </div>
+              <div class="hc-metric">
+                <span class="val">98.4%</span>
+                <span class="lbl">Précision IA</span>
+                <span class="up">↑ Excellence</span>
+              </div>
+              <div class="hc-metric">
+                <span class="val">1.8s</span>
+                <span class="lbl">Temps moyen</span>
+                <span class="down">↓ −0.3s</span>
+              </div>
+            </div>
+
+            <div class="hc-bars">
+              <div class="hc-bar"><div class="hc-bar-fill blue"   style="height:45%"></div></div>
+              <div class="hc-bar"><div class="hc-bar-fill orange" style="height:70%"></div></div>
+              <div class="hc-bar"><div class="hc-bar-fill blue"   style="height:55%"></div></div>
+              <div class="hc-bar"><div class="hc-bar-fill green"  style="height:90%"></div></div>
+              <div class="hc-bar"><div class="hc-bar-fill orange" style="height:60%"></div></div>
+              <div class="hc-bar"><div class="hc-bar-fill blue"   style="height:80%"></div></div>
+              <div class="hc-bar"><div class="hc-bar-fill green"  style="height:65%"></div></div>
+            </div>
+
+            <div class="hc-list">
+              <div class="hc-item">
+                <span class="ico">📄</span>
+                <span class="name">Rapport_Q4_2025.pdf</span>
+                <span class="tag tag-green">Analysé</span>
+              </div>
+              <div class="hc-item">
+                <span class="ico">📊</span>
+                <span class="name">Données_clients.xlsx</span>
+                <span class="tag tag-blue">En cours</span>
+              </div>
+              <div class="hc-item">
+                <span class="ico">📝</span>
+                <span class="name">Contrat_fournisseur.docx</span>
+                <span class="tag tag-amber">Révision</span>
+              </div>
+            </div>
           </div>
-          <div class="s3d-badge mid-left">
-            <div class="badge-status ok"><span class="ai-pulse"></span>IA active</div>
-            <div class="badge-ai">Mistral · claude-sonnet</div>
+        </div>
+
+        <!-- Chips flottants -->
+        <div class="hero-chip c1">
+          <div class="chip-inner">
+            <span class="chip-ico">🤖</span>
+            <div class="chip-text">
+              <span class="t1">IA activée</span>
+              <span class="t2">Claude Sonnet 4.6</span>
+            </div>
           </div>
-          <div class="s3d-badge bot-right">
-            <div class="badge-val">+27%</div>
-            <div class="badge-lbl">Performance</div>
+        </div>
+        <div class="hero-chip c2">
+          <div class="chip-inner">
+            <span class="chip-ico">⚡</span>
+            <div class="chip-text">
+              <span class="t1">+340% productivité</span>
+              <span class="t2">Entreprises clientes</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-chip c3">
+          <div class="chip-inner">
+            <span class="chip-ico">🔒</span>
+            <div class="chip-text">
+              <span class="t1">RGPD conforme</span>
+              <span class="t2">Données sécurisées</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Stats bar -->
+    <div class="hero-stats-bar">
+      <div class="hero-stat">
+        <span class="num gradient-text">50 000+</span>
+        <div class="lbl">Documents traités / mois</div>
+      </div>
+      <div class="hero-stat">
+        <span class="num gradient-text">1 200+</span>
+        <div class="lbl">Entreprises clientes</div>
+      </div>
+      <div class="hero-stat">
+        <span class="num gradient-text">98.4%</span>
+        <div class="lbl">Précision d'extraction</div>
+      </div>
+      <div class="hero-stat">
+        <span class="num gradient-text">2s</span>
+        <div class="lbl">Temps de traitement moyen</div>
+      </div>
+    </div>
   </section>
 
-  <!-- FEATURES -->
-  <section class="section-features">
+  <!-- FONCTIONNALITÉS -->
+  <section class="section">
     <div class="container">
-      <div class="sec-header">
-        <span class="sec-badge">Fonctionnalités</span>
-        <h2>Tout ce dont votre entreprise a besoin</h2>
-        <p>Cinq puissants modules IA, une seule clé API pour tout piloter.</p>
+      <div class="sec-head">
+        <div class="sec-label"><span class="dot"></span>Fonctionnalités</div>
+        <h2>Tout ce dont votre entreprise a besoin<br>en <span class="gradient-text">un seul outil</span></h2>
+        <p>5 modules IA puissants, connectés à vos outils existants, pour automatiser 80% de votre traitement documentaire.</p>
       </div>
-      <div class="features-grid">
-        <div class="feat-card" onclick="showPage('ai');setTimeout(()=>switchFeature('generation'),200)" style="cursor:pointer">
-          <div class="feat-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-          </div>
+
+      <div class="feat-grid">
+        <div class="feat-card" onclick="showPage('ai')">
+          <div class="feat-icon">📝</div>
           <h3>Génération de documents</h3>
-          <p>Contrats, devis, factures, lettres commerciales, rapports, NDA… Générez tout type de document professionnel en quelques secondes.</p>
+          <p>Créez en secondes contrats, rapports, lettres, CV, propositions commerciales et bien plus — personnalisés et professionnels.</p>
+          <div class="feat-arrow">Explorer le module <span>→</span></div>
         </div>
-        <div class="feat-card" onclick="showPage('ai');setTimeout(()=>switchFeature('extraction'),200)" style="cursor:pointer">
-          <div class="feat-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          </div>
+        <div class="feat-card" onclick="showPage('ai')">
+          <div class="feat-icon">🔍</div>
           <h3>Extraction &amp; Résumé</h3>
-          <p>Importez vos PDF, Word, Excel ou CSV et obtenez instantanément une extraction structurée des données clés et un résumé exécutif.</p>
+          <p>Importez PDF, DOCX, XLSX, CSV ou TXT. Obtenez données clés, résumés exécutifs et points d'action en quelques clics.</p>
+          <div class="feat-arrow">Explorer le module <span>→</span></div>
         </div>
-        <div class="feat-card" onclick="showPage('ai');setTimeout(()=>switchFeature('analysis'),200)" style="cursor:pointer">
-          <div class="feat-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-          </div>
-          <h3>Analyse &amp; Rapports</h3>
-          <p>Analyse causale de vos données avec infographies automatiques, identification des tendances, causes, conséquences et plan d'action.</p>
+        <div class="feat-card" onclick="showPage('ai')">
+          <div class="feat-icon">📊</div>
+          <h3>Analyse &amp; Rapports visuels</h3>
+          <p>Transformez vos données brutes en infographies et graphiques interactifs. Exportez en PDF ou partagez en direct.</p>
+          <div class="feat-arrow">Explorer le module <span>→</span></div>
         </div>
-        <div class="feat-card" onclick="showPage('ai');setTimeout(()=>switchFeature('email'),200)" style="cursor:pointer">
-          <div class="feat-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-          </div>
-          <h3>Connexion Boîte Mail</h3>
-          <p>Connectez votre Gmail ou Outlook via clé API. L'IA lit, classe et résume vos emails, et rédige des réponses professionnelles.</p>
+        <div class="feat-card" onclick="showPage('ai')">
+          <div class="feat-icon">📧</div>
+          <h3>Connexion Email</h3>
+          <p>Connectez Gmail ou Outlook via API. Classez, résumez et répondez à vos emails professionnels automatiquement.</p>
+          <div class="feat-arrow">Explorer le module <span>→</span></div>
         </div>
-        <div class="feat-card" onclick="showPage('ai');setTimeout(()=>switchFeature('storage'),200)" style="cursor:pointer">
-          <div class="feat-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-          </div>
-          <h3>Connexion Stockage</h3>
-          <p>Reliez Google Drive, Dropbox ou OneDrive. Explorez, organisez et exploitez vos ressources avec l'aide de l'intelligence artificielle.</p>
+        <div class="feat-card" onclick="showPage('ai')">
+          <div class="feat-icon">☁️</div>
+          <h3>Stockage Cloud</h3>
+          <p>Branchez Dropbox, Google Drive ou OneDrive. Analysez directement vos fichiers cloud sans les télécharger manuellement.</p>
+          <div class="feat-arrow">Explorer le module <span>→</span></div>
         </div>
-        <div class="feat-card">
-          <div class="feat-icon">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          </div>
-          <h3>Données 100% privées</h3>
-          <p>Vos fichiers et clés API ne transitent jamais par nos serveurs. Tout est traité directement entre votre navigateur et l'API IA choisie.</p>
+        <div class="feat-card" onclick="showPage('pricing')">
+          <div class="feat-icon">🔑</div>
+          <h3>Une seule clé API</h3>
+          <p>Un seul abonnement, une clé Claude ou Mistral. Tous les modules, toute l'intelligence, sans complexité ni surcoût caché.</p>
+          <div class="feat-arrow">Voir les tarifs <span>→</span></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- HOW IT WORKS -->
-  <section class="section-how dark-section">
+  <!-- COMMENT ÇA MARCHE -->
+  <section class="section" style="background:var(--bg2)">
     <div class="container">
-      <div class="sec-header light">
-        <span class="sec-badge">Comment ça marche</span>
-        <h2>Opérationnel en 3 étapes</h2>
-        <p>Configurez une fois, utilisez partout.</p>
+      <div class="sec-head">
+        <div class="sec-label"><span class="dot"></span>Comment ça marche</div>
+        <h2>Opérationnel en <span class="gradient-text">3 étapes</span></h2>
+        <p>Aucune installation, aucune configuration complexe. Entrez votre clé API et commencez immédiatement.</p>
       </div>
-      <div class="how-steps">
-        <div class="how-step">
-          <div class="how-num">01</div>
-          <div class="how-icon">🔑</div>
+
+      <div class="how-grid">
+        <div class="how-card">
+          <div class="how-num">1</div>
           <h3>Connectez votre IA</h3>
-          <p>Entrez votre clé API Claude (Anthropic) ou Mistral AI. Choisissez votre modèle préféré. Vos données restent chez vous.</p>
+          <p>Entrez votre clé API Claude (Anthropic) ou Mistral en toute sécurité. Elle reste dans votre session, jamais sur nos serveurs.</p>
         </div>
-        <div class="how-arrow">
-          <svg width="36" height="14" viewBox="0 0 40 16" fill="none"><path d="M0 8h36M30 2l8 6-8 6" stroke="#f97316" stroke-width="2"/></svg>
-        </div>
-        <div class="how-step">
-          <div class="how-num">02</div>
-          <div class="how-icon">🗂️</div>
+        <div class="how-card">
+          <div class="how-num">2</div>
           <h3>Choisissez un module</h3>
-          <p>Accédez à l'un des 5 modules : génération, extraction, analyse, email ou stockage. Chacun adapté à votre besoin métier.</p>
+          <p>Génération, extraction, analyse, email ou stockage cloud. Chaque module est optimisé pour son usage métier.</p>
         </div>
-        <div class="how-arrow">
-          <svg width="36" height="14" viewBox="0 0 40 16" fill="none"><path d="M0 8h36M30 2l8 6-8 6" stroke="#f97316" stroke-width="2"/></svg>
-        </div>
-        <div class="how-step">
-          <div class="how-num">03</div>
-          <div class="how-icon">🚀</div>
+        <div class="how-card">
+          <div class="how-num">3</div>
           <h3>Obtenez vos résultats</h3>
-          <p>Document généré, rapport complet avec graphiques, emails analysés, fichiers organisés — exportables en PDF en un clic.</p>
+          <p>En quelques secondes, votre document est prêt. Exportez en PDF, copiez le contenu ou partagez directement.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- USE CASES -->
-  <section class="section-cases">
+  <!-- CAS D'USAGE -->
+  <section class="section">
     <div class="container">
-      <div class="sec-header">
-        <span class="sec-badge">Cas d'usage</span>
-        <h2>Des solutions pour chaque département</h2>
-        <p>Archiva s'adapte à tous vos besoins documentaires et analytiques.</p>
+      <div class="sec-head">
+        <div class="sec-label"><span class="dot"></span>Cas d'usage</div>
+        <h2>Pour chaque service<br>de votre <span class="gradient-text">entreprise</span></h2>
+        <p>Archiva s'adapte à tous les départements et toutes les tailles d'organisation.</p>
       </div>
+
       <div class="cases-grid">
-        <div class="case-card" onclick="showPage('ai');setTimeout(()=>switchFeature('generation'),200)">
-          <div class="case-emoji">⚖️</div>
-          <h3>Direction Juridique</h3>
-          <p>Générez contrats, NDA, conditions générales, mises en demeure. Extrayez les clauses clés de tout document légal.</p>
-          <span class="case-link">Utiliser →</span>
+        <div class="case-card">
+          <div class="case-ico">⚖️</div>
+          <h3>Juridique</h3>
+          <p>Contrats, CGV, RGPD, NDA — rédigés et analysés automatiquement.</p>
+          <span class="case-tag">Génération + Analyse</span>
         </div>
-        <div class="case-card" onclick="showPage('ai');setTimeout(()=>switchFeature('analysis'),200)">
-          <div class="case-emoji">💹</div>
-          <h3>Direction Financière</h3>
-          <p>Analysez vos bilans, comptes de résultat et tableaux de bord. Obtenez rapports et graphiques prêts pour vos comités.</p>
-          <span class="case-link">Utiliser →</span>
+        <div class="case-card">
+          <div class="case-ico">📈</div>
+          <h3>Finance</h3>
+          <p>Rapports financiers, analyses de données, tableaux de bord visuels avec graphiques.</p>
+          <span class="case-tag">Extraction + Graphiques</span>
         </div>
-        <div class="case-card" onclick="showPage('ai');setTimeout(()=>switchFeature('email'),200)">
-          <div class="case-emoji">📧</div>
-          <h3>Service Commercial</h3>
-          <p>Gérez votre boite mail depuis Archiva : résumés, réponses automatiques, relances et suivi de prospects par IA.</p>
-          <span class="case-link">Utiliser →</span>
+        <div class="case-card">
+          <div class="case-ico">🤝</div>
+          <h3>Ressources Humaines</h3>
+          <p>Fiches de poste, lettres de mission, évaluation de CVs en masse en quelques minutes.</p>
+          <span class="case-tag">Génération + Résumé</span>
         </div>
-        <div class="case-card" onclick="showPage('ai');setTimeout(()=>switchFeature('storage'),200)">
-          <div class="case-emoji">🗄️</div>
-          <h3>Direction Générale</h3>
-          <p>Centralisez et organisez votre GED. L'IA structure vos dossiers, résume vos fichiers et identifie les documents critiques.</p>
-          <span class="case-link">Utiliser →</span>
+        <div class="case-card">
+          <div class="case-ico">🚀</div>
+          <h3>Commercial</h3>
+          <p>Propositions commerciales, devis, emailings personnalisés à grande échelle.</p>
+          <span class="case-tag">Email + Génération</span>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- TESTIMONIALS -->
-  <section class="section-testimonials dark-section">
+  <!-- TÉMOIGNAGES -->
+  <section class="section" style="background:var(--bg2)">
     <div class="container">
-      <div class="sec-header">
-        <span class="sec-badge">Témoignages</span>
-        <h2>Ils font confiance à Archiva</h2>
+      <div class="sec-head">
+        <div class="sec-label"><span class="dot"></span>Témoignages</div>
+        <h2>Ce que disent nos <span class="gradient-text">clients</span></h2>
       </div>
-      <div class="testimonials-grid">
-        <div class="testi-card">
-          <div class="testi-stars">★★★★★</div>
-          <p>"La génération de contrats nous fait gagner des heures chaque semaine. La qualité est bluffante, et on garde le contrôle total de nos données."</p>
-          <div class="testi-author">
-            <div class="testi-avatar">SL</div>
-            <div><strong>Sophie Laurent</strong><span>Directrice Juridique, TechStart SAS</span></div>
-          </div>
-        </div>
+
+      <div class="testi-grid">
         <div class="testi-card featured">
           <div class="testi-stars">★★★★★</div>
-          <p>"L'analyse financière avec infographies est parfaite pour nos rapports de direction. Ce qui prenait 2 jours se fait maintenant en 5 minutes."</p>
+          <p class="testi-quote">« Archiva a transformé notre façon de traiter les contrats. Ce qui prenait 2 heures ne prend plus que 3 minutes. L'extraction de données est bluffante de précision. »</p>
           <div class="testi-author">
-            <div class="testi-avatar">MR</div>
-            <div><strong>Marc Rénaud</strong><span>DAF, Groupe Nexo</span></div>
+            <div class="testi-avatar av-orange">SL</div>
+            <div>
+              <span class="testi-name">Sophie Laurent</span>
+              <span class="testi-role">DAF — Groupe Meridian</span>
+            </div>
           </div>
         </div>
         <div class="testi-card">
           <div class="testi-stars">★★★★★</div>
-          <p>"Le module email est une révolution. Notre équipe commerciale traite 3x plus de leads grâce aux résumés et réponses automatiques d'Archiva."</p>
+          <p class="testi-quote">« La connexion à Google Drive et l'analyse automatique de nos rapports mensuels nous fait gagner 15h par semaine. Le ROI est immédiat dès le premier mois. »</p>
           <div class="testi-author">
-            <div class="testi-avatar">AC</div>
-            <div><strong>Amélie Chardon</strong><span>CEO, Conseil &amp; Stratégie</span></div>
+            <div class="testi-avatar av-blue">TM</div>
+            <div>
+              <span class="testi-name">Thomas Mercier</span>
+              <span class="testi-role">CTO — StartupFactory</span>
+            </div>
+          </div>
+        </div>
+        <div class="testi-card">
+          <div class="testi-stars">★★★★★</div>
+          <p class="testi-quote">« En cabinet RH, on traite des centaines de CVs par semaine. Archiva résume et classe chaque profil en quelques secondes. Absolument indispensable. »</p>
+          <div class="testi-author">
+            <div class="testi-avatar av-green">AC</div>
+            <div>
+              <span class="testi-name">Amélie Chauvin</span>
+              <span class="testi-role">DRH — HRConsult Paris</span>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
-  <section class="section-cta">
+  <!-- CTA BANNER -->
+  <section class="section">
     <div class="container">
-      <div class="cta-box">
-        <h2>Prêt à transformer la gestion documentaire de votre entreprise ?</h2>
-        <p>Commencez gratuitement. Aucune carte de crédit requise. Données 100% privées.</p>
-        <div class="cta-btns">
-          <button class="btn-primary btn-lg" onclick="showPage('ai')">Démarrer maintenant</button>
-          <button class="btn-ghost btn-lg" onclick="showPage('contact')">Contacter l'équipe</button>
+      <div class="cta-banner">
+        <div class="sec-label" style="margin:0 auto 1.5rem"><span class="dot"></span>Commencer maintenant</div>
+        <h2>Prêt à transformer votre<br><span class="gradient-text">gestion documentaire ?</span></h2>
+        <p>Rejoignez 1 200+ entreprises qui ont déjà automatisé leur traitement de données.</p>
+        <div class="cta-actions">
+          <button class="btn btn-primary btn-lg" onclick="showPage('ai')">
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            Démarrer gratuitement
+          </button>
+          <button class="btn btn-ghost btn-lg" onclick="showPage('contact')">Contacter l'équipe</button>
         </div>
-        <div class="cta-note">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          Conforme RGPD · Données traitées dans votre navigateur uniquement
-        </div>
+        <p class="cta-fine">Aucune carte bancaire · Annulation à tout moment · Support 7j/7</p>
       </div>
     </div>
   </section>
-</div>
 
-<!-- =================================================================
-     PAGE ESPACE IA
-================================================================= -->
-<div id="page-ai" class="page">
-  <div class="ai-wrapper">
-    <div class="ai-page-header">
-      <span class="sec-badge">Espace IA</span>
-      <h1>Vos outils intelligents</h1>
-      <p>Configurez votre IA une fois, utilisez les 5 modules sans limite.</p>
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-top">
+        <div>
+          <div class="footer-logo" onclick="showPage('home')">
+            <div class="logo-icon" style="width:30px;height:30px">
+              <svg width="15" height="15" fill="none" stroke="#fff" stroke-width="2.2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+            </div>
+            <span>Archiva</span>
+          </div>
+          <p class="footer-desc">La plateforme d'intelligence documentaire pour les entreprises modernes. Générez, analysez, et automatisez avec l'IA.</p>
+          <p class="footer-company">A.E.L. Corporation</p>
+        </div>
+        <div class="footer-links">
+          <div class="footer-col">
+            <h4>Produit</h4>
+            <a onclick="showPage('ai')">Espace IA</a>
+            <a onclick="showPage('pricing')">Tarifs</a>
+            <a onclick="showPage('home')">Fonctionnalités</a>
+            <a onclick="showPage('home')">Cas d'usage</a>
+          </div>
+          <div class="footer-col">
+            <h4>Entreprise</h4>
+            <a onclick="showPage('contact')">Contact</a>
+            <a onclick="openModal('modalMentions')">Mentions légales</a>
+            <a onclick="openModal('modalRgpd')">Politique RGPD</a>
+            <a onclick="openModal('modalCgu')">CGU</a>
+          </div>
+          <div class="footer-col">
+            <h4>Contact</h4>
+            <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a>
+            <a href="tel:+33621642329">06 21 64 23 29</a>
+            <a>A.E.L. Corporation</a>
+            <a onclick="openModal('modalCookies')">Préférences cookies</a>
+          </div>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2025 A.E.L. Corporation · Archiva. Tous droits réservés.</span>
+        <div class="footer-rgpd">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Hébergé en France — RGPD conforme
+        </div>
+      </div>
+    </div>
+  </footer>
+
+</div><!-- /page-home -->
+
+
+<!-- ══════════════════════════════════════
+     PAGE : ESPACE IA
+══════════════════════════════════════ -->
+<div class="page" id="page-ai">
+  <div class="ai-page">
+
+    <div class="ai-header">
+      <div class="sec-label" style="margin:0 auto 1rem"><span class="dot"></span>Intelligence Artificielle</div>
+      <h1>Espace <span class="gradient-text">IA</span></h1>
+      <p>Connectez votre clé API et accédez à tous les modules de traitement documentaire.</p>
     </div>
 
-    <!-- API Config Card -->
-    <div class="api-config-card" id="api-config-card">
-      <div class="api-config-top">
-        <div class="api-status-row">
-          <div class="status-led" id="status-led"></div>
-          <span id="status-text">IA non configurée</span>
+    <!-- CARTE CLÉ API -->
+    <div class="api-card" id="apiCard">
+      <div class="api-top-row">
+        <div>
+          <h3 style="font-size:1rem;margin-bottom:.2rem">Connexion API</h3>
+          <p style="font-size:.82rem;margin:0">Clé Claude (Anthropic) ou Mistral AI</p>
         </div>
-        <div class="provider-pills">
-          <button class="prov-pill active" id="pill-claude" onclick="selectProvider('claude')">🔶 Claude</button>
-          <button class="prov-pill" id="pill-mistral" onclick="selectProvider('mistral')">⚡ Mistral</button>
+        <div class="prov-pills">
+          <button class="prov-pill active" id="pill-claude" onclick="selectProvider('claude')">🤖 Claude</button>
+          <button class="prov-pill" id="pill-mistral" onclick="selectProvider('mistral')">✨ Mistral</button>
         </div>
-        <div class="api-input-row" style="flex:1;min-width:280px">
-          <input type="password" id="api-key-input" class="api-key-input" placeholder="sk-ant-api03-... ou votre clé Mistral" autocomplete="off" oninput="onApiKeyInput()">
-          <button class="btn-connect" onclick="saveAndTestApiKey()" id="btn-connect">Connecter</button>
+        <div class="api-status">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Non connecté</span>
         </div>
       </div>
-      <div id="api-test-result" style="display:none"></div>
-      <div class="api-privacy">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        Votre clé API reste dans votre navigateur (sessionStorage). Elle n'est jamais transmise à nos serveurs.
+
+      <div class="api-input-row">
+        <input type="password" class="api-key-inp" id="apiKeyInput" placeholder="sk-ant-api03-… ou votre clé Mistral">
+        <button class="btn-connect" onclick="connectApi()">Connecter</button>
       </div>
+
+      <div class="api-result" id="apiResult"></div>
+
+      <p class="api-note">
+        <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <rect x="3" y="11" width="18" height="11" rx="2"/>
+          <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+        </svg>
+        Votre clé est stockée en session uniquement — jamais transmise à nos serveurs.
+      </p>
       <details class="api-help">
-        <summary>📖 Comment obtenir ma clé API ?</summary>
+        <summary>Comment obtenir une clé API ?</summary>
         <div class="api-help-body">
-          <p><strong>Claude (Anthropic) :</strong> Rendez-vous sur <em>console.anthropic.com</em> → API Keys → Créer une clé. Activez "Browser access" dans les paramètres de la clé.</p>
-          <p><strong>Mistral AI :</strong> Rendez-vous sur <em>console.mistral.ai</em> → API Keys → Créer une clé. Compatible avec les appels navigateur.</p>
+          <strong>Claude (Anthropic) :</strong> Rendez-vous sur console.anthropic.com → API Keys → Créer une clé.<br><br>
+          <strong>Mistral AI :</strong> Rendez-vous sur console.mistral.ai → API Keys → Générer une clé.
         </div>
       </details>
     </div>
 
-    <!-- Feature Navigation -->
-    <div class="feature-nav" id="feature-nav">
-      <button class="fnav-btn active" id="fnav-generation" onclick="switchFeature('generation')">
-        <span class="fnav-icon">📄</span><span>Génération</span>
-      </button>
-      <button class="fnav-btn" id="fnav-extraction" onclick="switchFeature('extraction')">
-        <span class="fnav-icon">🔍</span><span>Extraction</span>
-      </button>
-      <button class="fnav-btn" id="fnav-analysis" onclick="switchFeature('analysis')">
-        <span class="fnav-icon">📊</span><span>Analyse</span>
-      </button>
-      <button class="fnav-btn" id="fnav-email" onclick="switchFeature('email')">
-        <span class="fnav-icon">📧</span><span>Email</span>
-      </button>
-      <button class="fnav-btn" id="fnav-storage" onclick="switchFeature('storage')">
-        <span class="fnav-icon">🗄️</span><span>Stockage</span>
-      </button>
+    <!-- NAVIGATION MODULES -->
+    <div class="feat-nav">
+      <button class="fnav active" id="fnav-gen"      onclick="switchPanel('gen')">📝 Génération</button>
+      <button class="fnav"        id="fnav-extract"  onclick="switchPanel('extract')">🔍 Extraction</button>
+      <button class="fnav"        id="fnav-analysis" onclick="switchPanel('analysis')">📊 Analyse</button>
+      <button class="fnav"        id="fnav-email"    onclick="switchPanel('email')">📧 Email</button>
+      <button class="fnav"        id="fnav-storage"  onclick="switchPanel('storage')">☁️ Stockage</button>
     </div>
 
-    <!-- ===== PANEL 1 : GÉNÉRATION DE DOCUMENTS ===== -->
-    <div class="feature-panel active" id="panel-generation">
-      <div class="panel-card">
-        <div class="panel-header">
-          <h2>📄 Génération de documents professionnels</h2>
-          <p>Sélectionnez un type de document, renseignez le contexte et laissez l'IA rédiger pour vous.</p>
-        </div>
+    <!-- ── PANEL 1 : GÉNÉRATION ── -->
+    <div class="f-panel active" id="panel-gen">
+      <div class="panel-box">
+        <h2 class="panel-title">Génération de documents</h2>
+        <p class="panel-sub">Créez tout type de document professionnel en quelques secondes grâce à l'IA.</p>
 
         <div class="form-field">
           <label>Type de document</label>
-          <div class="doctype-grid" id="doctype-grid">
-            <div class="doctype-chip active" onclick="selectDocType(this,'Contrat de travail')">📋 Contrat de travail</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Contrat de prestation')">🤝 Contrat de prestation</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'NDA / Accord de confidentialité')">🔒 NDA</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Devis commercial')">💰 Devis</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Facture')">🧾 Facture</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Bon de commande')">📦 Bon de commande</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Lettre commerciale')">✉️ Lettre commerciale</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Mise en demeure')">⚠️ Mise en demeure</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Note de service')">📝 Note de service</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Compte-rendu de réunion')">📋 Compte-rendu</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Rapport d\'activité')">📈 Rapport d'activité</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Cahier des charges')">📐 Cahier des charges</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Appel d\'offres')">🏷️ Appel d'offres</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Politique interne')">📑 Politique interne</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Fiche de poste')">👤 Fiche de poste</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'CGV / CGU')">⚖️ CGV / CGU</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Procès-verbal')">🗂️ Procès-verbal</div>
-            <div class="doctype-chip" onclick="selectDocType(this,'Document personnalisé')">✏️ Personnalisé</div>
+          <div class="chip-grid" id="docTypeGrid">
+            <div class="chip active" data-type="Contrat commercial">📋 Contrat commercial</div>
+            <div class="chip" data-type="Lettre professionnelle">✉️ Lettre professionnelle</div>
+            <div class="chip" data-type="Rapport d'activité">📈 Rapport d'activité</div>
+            <div class="chip" data-type="Proposition commerciale">💼 Proposition commerciale</div>
+            <div class="chip" data-type="CV professionnel">👤 CV professionnel</div>
+            <div class="chip" data-type="Note de service">📌 Note de service</div>
+            <div class="chip" data-type="Procès-verbal">📜 Procès-verbal</div>
+            <div class="chip" data-type="Cahier des charges">📐 Cahier des charges</div>
+            <div class="chip" data-type="Business Plan">🚀 Business Plan</div>
+            <div class="chip" data-type="Devis commercial">💰 Devis</div>
+            <div class="chip" data-type="Facture">🧾 Facture</div>
+            <div class="chip" data-type="Politique RGPD">🔒 Politique RGPD</div>
           </div>
         </div>
 
-        <div class="panel-2col">
+        <div class="form-grid-2">
           <div class="form-field">
-            <label for="gen-company">Nom de votre société</label>
-            <input type="text" id="gen-company" class="form-input" placeholder="Ex : Acme SAS">
+            <label>Entreprise / Contexte</label>
+            <input type="text" class="form-input" id="genCompany" placeholder="Ex : TechCorp SAS, secteur IT…">
           </div>
           <div class="form-field">
-            <label for="gen-recipient">Destinataire / Autre partie</label>
-            <input type="text" id="gen-recipient" class="form-input" placeholder="Ex : Client Dupont SARL">
-          </div>
-        </div>
-
-        <div class="form-field">
-          <label for="gen-context">Contexte et paramètres du document *</label>
-          <textarea id="gen-context" class="form-textarea" rows="5" placeholder="Décrivez les détails spécifiques : noms, dates, montants, conditions, clauses particulières, objet précis du document..."></textarea>
-        </div>
-
-        <div class="panel-2col">
-          <div class="form-field">
-            <label for="gen-lang">Langue du document</label>
-            <select id="gen-lang" class="form-input form-select">
-              <option value="français">🇫🇷 Français</option>
-              <option value="anglais">🇬🇧 Anglais</option>
-              <option value="espagnol">🇪🇸 Espagnol</option>
-              <option value="allemand">🇩🇪 Allemand</option>
-              <option value="italien">🇮🇹 Italien</option>
-            </select>
-          </div>
-          <div class="form-field">
-            <label for="gen-tone">Ton du document</label>
-            <select id="gen-tone" class="form-input form-select">
-              <option value="professionnel et formel">Professionnel &amp; Formel</option>
-              <option value="professionnel et concis">Professionnel &amp; Concis</option>
-              <option value="cordial et professionnel">Cordial &amp; Professionnel</option>
-              <option value="technique et précis">Technique &amp; Précis</option>
+            <label>Langue</label>
+            <select class="form-select" id="genLang">
+              <option value="français">Français</option>
+              <option value="anglais">Anglais</option>
+              <option value="espagnol">Espagnol</option>
+              <option value="allemand">Allemand</option>
             </select>
           </div>
         </div>
 
         <div class="form-field">
-          <label for="gen-instructions">Instructions supplémentaires (optionnel)</label>
-          <textarea id="gen-instructions" class="form-textarea" rows="3" placeholder="Ex : Inclure une clause de non-concurrence de 2 ans, mentionner les pénalités de retard..."></textarea>
+          <label>Instructions complémentaires</label>
+          <textarea class="form-textarea" id="genInstructions" rows="4"
+            placeholder="Décrivez le contenu souhaité : parties prenantes, clauses spécifiques, ton, objectifs…"></textarea>
+        </div>
+
+        <div class="form-field">
+          <label>Longueur du document</label>
+          <select class="form-select" id="genLength">
+            <option value="court">Court (1–2 pages)</option>
+            <option value="moyen" selected>Moyen (3–5 pages)</option>
+            <option value="long">Long (5–10 pages)</option>
+            <option value="très long">Très long (10+ pages)</option>
+          </select>
         </div>
 
         <div class="step-nav">
-          <button class="btn-primary" onclick="generateDocument()" id="btn-generate">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+          <button class="btn btn-primary btn-lg" onclick="generateDoc()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
             Générer le document
           </button>
         </div>
 
-        <div id="gen-output" class="output-area" style="display:none">
-          <div class="output-topbar">
-            <div class="output-label">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/></svg>
+        <div class="output-box" id="genOutput" style="display:none">
+          <div class="output-bar">
+            <span class="output-lbl">
+              <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
               Document généré
-            </div>
-            <div class="output-actions">
-              <button class="btn-pdf" onclick="copyOutput('gen-output-body')">📋 Copier</button>
-              <button class="btn-pdf" onclick="exportDocToPDF('gen-output-body','document-archiva')">⬇️ PDF</button>
-              <button class="btn-secondary btn-sm" onclick="generateDocument()">🔄 Regénérer</button>
-            </div>
-          </div>
-          <div id="gen-output-body" class="output-body"></div>
-        </div>
-        <div id="gen-loading" style="display:none">
-          <div class="loading-overlay">
-            <div class="loading-ring"></div>
-            <h3>Génération en cours…</h3>
-            <p>L'IA rédige votre document.</p>
-            <div class="loading-steps">
-              <div class="ls-item"><span class="ls-dot active" id="ls-g1"></span><span>Analyse du contexte</span></div>
-              <div class="ls-item"><span class="ls-dot" id="ls-g2"></span><span>Rédaction du document</span></div>
-              <div class="ls-item"><span class="ls-dot" id="ls-g3"></span><span>Mise en forme finale</span></div>
+            </span>
+            <div class="output-acts">
+              <button class="btn btn-sm btn-ghost" onclick="copyOutput('genContent')">📋 Copier</button>
+              <button class="btn btn-sm btn-primary" onclick="exportPdf('genContent')">⬇️ PDF</button>
             </div>
           </div>
+          <div class="output-body" id="genContent"></div>
         </div>
       </div>
     </div>
 
-    <!-- ===== PANEL 2 : EXTRACTION & RÉSUMÉ ===== -->
-    <div class="feature-panel" id="panel-extraction">
-      <div class="panel-card">
-        <div class="panel-header">
-          <h2>🔍 Extraction &amp; Résumé de documents</h2>
-          <p>Importez vos documents et obtenez une extraction structurée des données clés et un résumé intelligent.</p>
+    <!-- ── PANEL 2 : EXTRACTION ── -->
+    <div class="f-panel" id="panel-extract">
+      <div class="panel-box">
+        <h2 class="panel-title">Extraction &amp; Résumé</h2>
+        <p class="panel-sub">Importez vos fichiers et obtenez un résumé intelligent ainsi que les données clés extraites par l'IA.</p>
+
+        <div class="data-tabs">
+          <button class="dtab active" id="dtab-upload" onclick="switchDataTab('upload')">📁 Fichier local</button>
+          <button class="dtab"        id="dtab-paste"  onclick="switchDataTab('paste')">📋 Coller du texte</button>
         </div>
 
-        <div class="data-tabs" id="ext-tabs">
-          <button class="dtab active" onclick="switchDataTab('ext','upload')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-            Fichier
-          </button>
-          <button class="dtab" onclick="switchDataTab('ext','text')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/></svg>
-            Texte libre
-          </button>
-        </div>
-
-        <div id="ext-dc-upload">
-          <div class="upload-zone" id="ext-upload-zone" onclick="document.getElementById('ext-file-input').click()" ondragover="handleDragOver(event,'ext-upload-zone')" ondrop="handleDrop(event,'ext-file-input','ext-file-list')" ondragleave="handleDragLeave(event,'ext-upload-zone')">
+        <div id="dtab-content-upload">
+          <div class="upload-zone" id="extractZone"
+            onclick="document.getElementById('extractFileInput').click()"
+            ondragover="handleDrag(event,'extractZone')"
+            ondragleave="handleDragLeave(event,'extractZone')"
+            ondrop="handleDrop(event,'extractFiles')">
             <div class="uz-icon">📂</div>
-            <div class="uz-text">Glissez votre fichier ici</div>
-            <div class="uz-sub">ou cliquez pour parcourir</div>
-            <div class="uz-formats">PDF · DOCX · XLSX · CSV · TXT — Max 10 MB</div>
-            <input type="file" id="ext-file-input" style="display:none" accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt" onchange="handleFileInput(event,'ext-file-list')">
+            <p class="uz-main">Glissez vos fichiers ici ou cliquez pour parcourir</p>
+            <p class="uz-sub">Traitement 100% local — vos données ne quittent pas votre navigateur</p>
+            <p class="uz-formats">PDF · DOCX · XLSX · CSV · TXT</p>
           </div>
-          <div id="ext-file-list" class="file-list"></div>
-        </div>
-        <div id="ext-dc-text" style="display:none">
-          <textarea id="ext-text" class="form-textarea" rows="8" placeholder="Collez ici le contenu à analyser (texte, tableau, données brutes, rapport…)"></textarea>
+          <input type="file" id="extractFileInput" multiple accept=".pdf,.docx,.xlsx,.csv,.txt"
+            style="display:none" onchange="handleFileSelect(event,'extractFiles')">
+          <div class="file-list" id="extractFiles"></div>
         </div>
 
-        <div class="form-field" style="margin-top:1.5rem">
-          <label>Type d'extraction</label>
-          <div class="doctype-grid">
-            <div class="doctype-chip active" onclick="selectExtType(this,'résumé exécutif complet')">📝 Résumé exécutif</div>
-            <div class="doctype-chip" onclick="selectExtType(this,'points clés et conclusions')">🎯 Points clés</div>
-            <div class="doctype-chip" onclick="selectExtType(this,'données structurées (tableaux, chiffres, dates, entités)')">📊 Données structurées</div>
-            <div class="doctype-chip" onclick="selectExtType(this,'entités nommées (personnes, entreprises, dates, montants, lieux)')">🏷️ Entités nommées</div>
-            <div class="doctype-chip" onclick="selectExtType(this,'clauses et obligations contractuelles')">⚖️ Clauses contractuelles</div>
-            <div class="doctype-chip" onclick="selectExtType(this,'extraction personnalisée')">✏️ Personnalisée</div>
+        <div id="dtab-content-paste" style="display:none">
+          <div class="form-field">
+            <label>Collez votre texte ici</label>
+            <textarea class="form-textarea" id="extractPasteText" rows="8"
+              placeholder="Collez ici le contenu à analyser…"></textarea>
           </div>
         </div>
 
-        <div class="form-field" id="ext-custom-field" style="display:none">
-          <label for="ext-custom">Précisez ce que vous souhaitez extraire</label>
-          <textarea id="ext-custom" class="form-textarea" rows="3" placeholder="Ex : Extraire toutes les dates d'échéance, les montants et les noms des signataires..."></textarea>
+        <div class="form-field" style="margin-top:1.25rem">
+          <label>Mode d'analyse</label>
+          <select class="form-select" id="extractMode">
+            <option value="résumé exécutif">Résumé exécutif</option>
+            <option value="extraction des données clés et chiffres">Extraction données clés</option>
+            <option value="liste des points d'action">Points d'action</option>
+            <option value="analyse complète avec résumé, données et recommandations" selected>Analyse complète</option>
+          </select>
         </div>
 
         <div class="step-nav">
-          <button class="btn-primary" onclick="runExtraction()" id="btn-extract">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            Lancer l'extraction
+          <button class="btn btn-primary btn-lg" onclick="runExtraction()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+            </svg>
+            Analyser
           </button>
         </div>
 
-        <div id="ext-loading" style="display:none">
-          <div class="loading-overlay">
-            <div class="loading-ring"></div>
-            <h3>Extraction en cours…</h3>
-            <p>L'IA analyse votre document.</p>
-          </div>
-        </div>
-        <div id="ext-output" class="output-area" style="display:none">
-          <div class="output-topbar">
-            <div class="output-label">✅ Extraction terminée</div>
-            <div class="output-actions">
-              <button class="btn-pdf" onclick="copyOutput('ext-output-body')">📋 Copier</button>
-              <button class="btn-pdf" onclick="exportDocToPDF('ext-output-body','extraction-archiva')">⬇️ PDF</button>
+        <div class="output-box" id="extractOutput" style="display:none">
+          <div class="output-bar">
+            <span class="output-lbl">Résultats de l'analyse</span>
+            <div class="output-acts">
+              <button class="btn btn-sm btn-ghost" onclick="copyOutput('extractContent')">📋 Copier</button>
+              <button class="btn btn-sm btn-primary" onclick="exportPdf('extractContent')">⬇️ PDF</button>
             </div>
           </div>
-          <div id="ext-output-body" class="output-body"></div>
+          <div class="output-body" id="extractContent"></div>
         </div>
       </div>
     </div>
 
-    <!-- ===== PANEL 3 : ANALYSE & RAPPORTS ===== -->
-    <div class="feature-panel" id="panel-analysis">
-      <div class="panel-card">
-        <div class="panel-header">
-          <h2>📊 Analyse de données &amp; Rapports</h2>
-          <p>Importez vos données, obtenez un rapport d'analyse complet avec causes, conséquences et infographies.</p>
-        </div>
+    <!-- ── PANEL 3 : ANALYSE ── -->
+    <div class="f-panel" id="panel-analysis">
+      <div class="panel-box">
+        <h2 class="panel-title">Analyse &amp; Rapports visuels</h2>
+        <p class="panel-sub">Importez des données brutes et obtenez un rapport complet avec graphiques et infographies interactifs.</p>
 
-        <div class="data-tabs">
-          <button class="dtab active" onclick="switchDataTab('ana','upload')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/></svg>
-            Fichier de données
-          </button>
-          <button class="dtab" onclick="switchDataTab('ana','text')">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="17" y1="10" x2="3" y2="10"/></svg>
-            Données texte
-          </button>
+        <div class="upload-zone" id="analysisZone"
+          onclick="document.getElementById('analysisFileInput').click()"
+          ondragover="handleDrag(event,'analysisZone')"
+          ondragleave="handleDragLeave(event,'analysisZone')"
+          ondrop="handleDrop(event,'analysisFiles')">
+          <div class="uz-icon">📊</div>
+          <p class="uz-main">Importez vos données à analyser</p>
+          <p class="uz-sub">XLSX, CSV, PDF ou TXT — résultats visuels garantis</p>
+          <p class="uz-formats">XLSX · CSV · PDF · TXT</p>
         </div>
+        <input type="file" id="analysisFileInput" multiple accept=".xlsx,.csv,.pdf,.txt"
+          style="display:none" onchange="handleFileSelect(event,'analysisFiles')">
+        <div class="file-list" id="analysisFiles"></div>
 
-        <div id="ana-dc-upload">
-          <div class="upload-zone" id="ana-upload-zone" onclick="document.getElementById('ana-file-input').click()" ondragover="handleDragOver(event,'ana-upload-zone')" ondrop="handleDrop(event,'ana-file-input','ana-file-list')" ondragleave="handleDragLeave(event,'ana-upload-zone')">
-            <div class="uz-icon">📊</div>
-            <div class="uz-text">Glissez votre fichier de données</div>
-            <div class="uz-sub">ou cliquez pour parcourir</div>
-            <div class="uz-formats">CSV · XLSX · XLS · PDF · TXT — Max 10 MB</div>
-            <input type="file" id="ana-file-input" style="display:none" accept=".csv,.xlsx,.xls,.pdf,.txt" onchange="handleFileInput(event,'ana-file-list')">
-          </div>
-          <div id="ana-file-list" class="file-list"></div>
-        </div>
-        <div id="ana-dc-text" style="display:none">
-          <textarea id="ana-text" class="form-textarea" rows="8" placeholder="Collez vos données (CSV, tableau, chiffres, rapport brut…)"></textarea>
-        </div>
-
-        <div class="panel-2col" style="margin-top:1.5rem">
-          <div class="form-field">
-            <label>Type d'analyse</label>
-            <div class="doctype-grid" style="grid-template-columns:repeat(auto-fill,minmax(130px,1fr))">
-              <div class="doctype-chip active" onclick="selectAnaType(this,'financière')">💹 Financière</div>
-              <div class="doctype-chip" onclick="selectAnaType(this,'marketing et commerciale')">📈 Marketing</div>
-              <div class="doctype-chip" onclick="selectAnaType(this,'opérationnelle')">⚙️ Opérationnelle</div>
-              <div class="doctype-chip" onclick="selectAnaType(this,'RH et performance')">👥 RH</div>
-              <div class="doctype-chip" onclick="selectAnaType(this,'stratégique')">🧭 Stratégique</div>
-              <div class="doctype-chip" onclick="selectAnaType(this,'personnalisée')">✏️ Personnalisée</div>
-            </div>
-          </div>
-          <div class="form-field">
-            <label>Profondeur du rapport</label>
-            <select id="ana-depth" class="form-input form-select">
-              <option value="synthétique (résumé et points clés en 1 page)">Synthétique (~2 min)</option>
-              <option value="détaillée avec causes, conséquences et plan d'action" selected>Détaillée (~8 min)</option>
-              <option value="exhaustive et expert avec recommandations stratégiques">Exhaustive (~15 min)</option>
-            </select>
-          </div>
+        <div class="form-field" style="margin-top:1.25rem">
+          <label>Type de rapport</label>
+          <select class="form-select" id="analysisType">
+            <option value="analyse financière complète avec KPIs et tendances">Analyse financière</option>
+            <option value="analyse de performance commerciale avec métriques clés" selected>Performance commerciale</option>
+            <option value="analyse des ressources humaines et de la productivité">RH et productivité</option>
+            <option value="analyse des données clients et segmentation">Données clients</option>
+            <option value="rapport de tendances et prévisions">Tendances et prévisions</option>
+          </select>
         </div>
 
         <div class="form-field">
-          <label for="ana-request">Votre demande d'analyse *</label>
-          <textarea id="ana-request" class="form-textarea" rows="5" placeholder="Ex : Analysez la performance financière sur les 12 derniers mois. Identifiez les tendances, les anomalies, leurs causes et conséquences. Proposez un plan d'action concret avec priorités et délais..."></textarea>
+          <label>Contexte / Objectif de l'analyse</label>
+          <textarea class="form-textarea" id="analysisContext" rows="3"
+            placeholder="Ex : données Q4 2025, identifier les tendances de vente, recommandations stratégiques…"></textarea>
         </div>
 
         <div class="step-nav">
-          <button class="btn-primary" onclick="runAnalysis()" id="btn-analyze">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-            Lancer l'analyse
+          <button class="btn btn-primary btn-lg" onclick="runAnalysis()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+            </svg>
+            Générer le rapport
           </button>
         </div>
 
-        <div id="ana-loading" style="display:none">
-          <div class="loading-overlay">
-            <div class="loading-ring"></div>
-            <h3>Analyse en cours…</h3>
-            <p id="ana-loading-msg">Traitement de vos données</p>
-            <div class="loading-steps">
-              <div class="ls-item"><span class="ls-dot active" id="ls-a1"></span><span>Lecture des données</span></div>
-              <div class="ls-item"><span class="ls-dot" id="ls-a2"></span><span>Analyse IA approfondie</span></div>
-              <div class="ls-item"><span class="ls-dot" id="ls-a3"></span><span>Génération des graphiques</span></div>
-              <div class="ls-item"><span class="ls-dot" id="ls-a4"></span><span>Mise en forme du rapport</span></div>
+        <div class="output-box" id="analysisOutput" style="display:none">
+          <div class="output-bar">
+            <span class="output-lbl">📊 Rapport d'analyse</span>
+            <div class="output-acts">
+              <button class="btn btn-sm btn-ghost" onclick="copyOutput('analysisContent')">📋 Copier</button>
+              <button class="btn btn-sm btn-primary" onclick="exportFullReport()">⬇️ PDF complet</button>
             </div>
           </div>
-        </div>
-
-        <div id="ana-output" style="display:none">
-          <div class="output-area">
-            <div class="output-topbar">
-              <div class="output-label">✅ Rapport généré</div>
-              <div class="output-actions">
-                <button class="btn-pdf" onclick="exportReportPDF()">⬇️ Exporter PDF</button>
-                <button class="btn-secondary btn-sm" onclick="runAnalysis()">🔄 Relancer</button>
-              </div>
-            </div>
-            <div id="ana-output-body" class="output-body"></div>
-          </div>
-          <div id="ana-charts" class="charts-grid"></div>
+          <div class="output-body" id="analysisContent"></div>
+          <div id="chartsArea" style="padding:1.25rem 1.5rem;border-top:1px solid var(--border)"></div>
         </div>
       </div>
     </div>
 
-    <!-- ===== PANEL 4 : CONNEXION EMAIL ===== -->
-    <div class="feature-panel" id="panel-email">
-      <div class="panel-card" id="email-connect-panel">
-        <div class="panel-header">
-          <h2>📧 Connexion Boîte Mail</h2>
-          <p>Connectez votre boite email via clé API pour lire, analyser et interagir avec vos messages grâce à l'IA.</p>
-        </div>
+    <!-- ── PANEL 4 : EMAIL ── -->
+    <div class="f-panel" id="panel-email">
+      <div class="panel-box">
+        <h2 class="panel-title">Connexion Email</h2>
+        <p class="panel-sub">Connectez votre boîte mail professionnelle via API pour lire, résumer et répondre automatiquement.</p>
 
         <div class="form-field">
           <label>Fournisseur email</label>
-          <div class="provider-cards-grid">
-            <div class="prov-card active" id="email-prov-gmail" onclick="selectEmailProvider('gmail')">
-              <div class="prov-card-icon">📨</div>
-              <div class="prov-card-name">Gmail</div>
-              <div class="prov-card-desc">Google API</div>
+          <div class="prov-grid">
+            <div class="prov-card active" id="eprov-gmail" onclick="selectEmailProvider('gmail')">
+              <div class="prov-ico">📧</div>
+              <div class="prov-name">Gmail</div>
+              <div class="prov-desc">Google API v1</div>
             </div>
-            <div class="prov-card" id="email-prov-outlook" onclick="selectEmailProvider('outlook')">
-              <div class="prov-card-icon">💼</div>
-              <div class="prov-card-name">Outlook</div>
-              <div class="prov-card-desc">Microsoft Graph</div>
-            </div>
-            <div class="prov-card" id="email-prov-other" onclick="selectEmailProvider('other')">
-              <div class="prov-card-icon">📬</div>
-              <div class="prov-card-name">Autre</div>
-              <div class="prov-card-desc">Coller emails</div>
+            <div class="prov-card" id="eprov-outlook" onclick="selectEmailProvider('outlook')">
+              <div class="prov-ico">📮</div>
+              <div class="prov-name">Outlook</div>
+              <div class="prov-desc">Microsoft Graph API</div>
             </div>
           </div>
         </div>
 
-        <div id="email-cred-gmail">
+        <div id="emailConfigGmail">
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label>Client ID Google</label>
+              <input type="text" class="form-input" id="gmailClientId" placeholder="123456789-xxx.apps.googleusercontent.com">
+            </div>
+            <div class="form-field">
+              <label>Client Secret</label>
+              <input type="password" class="form-input" id="gmailSecret" placeholder="GOCSPX-…">
+            </div>
+          </div>
           <div class="form-field">
-            <label for="gmail-token">Token d'accès OAuth2 Gmail</label>
-            <input type="password" id="gmail-token" class="form-input" placeholder="ya29.A0...">
-          </div>
-          <div class="field-note" style="margin-bottom:1rem">
-            💡 Obtenez votre token sur <strong>console.cloud.google.com</strong> → APIs → Gmail API → Credentials → OAuth 2.0.
-          </div>
-        </div>
-        <div id="email-cred-outlook" style="display:none">
-          <div class="form-field">
-            <label for="outlook-token">Token d'accès Microsoft Graph</label>
-            <input type="password" id="outlook-token" class="form-input" placeholder="eyJ0eXAiOiJKV...">
-          </div>
-          <div class="field-note" style="margin-bottom:1rem">
-            💡 Obtenez votre token sur <strong>portal.azure.com</strong> → Azure Active Directory → App registrations.
-          </div>
-        </div>
-        <div id="email-cred-other" style="display:none">
-          <div class="form-field">
-            <label for="email-manual">Collez le contenu de vos emails</label>
-            <textarea id="email-manual" class="form-textarea" rows="10" placeholder="Collez ici vos emails (sujet, expéditeur, contenu). Séparez chaque email par ---&#10;&#10;De: expediteur@email.com&#10;Sujet: Sujet de l'email&#10;Date: 01/01/2025&#10;Contenu de l'email...&#10;&#10;---"></textarea>
-          </div>
-          <div class="step-nav">
-            <button class="btn-primary" onclick="processManualEmails()">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-              Analyser les emails
-            </button>
+            <label>Access Token (OAuth 2.0)</label>
+            <input type="password" class="form-input" id="gmailToken" placeholder="ya29.A0…">
           </div>
         </div>
 
-        <div id="email-connect-btn-row" class="step-nav">
-          <button class="btn-primary" onclick="connectEmail()" id="btn-email-connect">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/></svg>
-            Connecter la boîte mail
-          </button>
-        </div>
-      </div>
-
-      <!-- Email List Panel (after connection) -->
-      <div id="email-inbox-panel" style="display:none">
-        <div class="panel-card">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:.75rem">
-            <div>
-              <h2 style="margin-bottom:.25rem">📥 Boîte de réception</h2>
-              <p style="font-size:.875rem" id="email-inbox-info">Connecté · Analyse IA disponible</p>
+        <div id="emailConfigOutlook" style="display:none">
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label>Application (Client) ID</label>
+              <input type="text" class="form-input" id="outlookClientId" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx">
             </div>
-            <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-              <button class="btn-secondary btn-sm" onclick="summarizeAllEmails()">🤖 Résumer tout</button>
-              <button class="btn-secondary btn-sm" onclick="categorizeEmails()">🏷️ Catégoriser</button>
-              <button class="btn-secondary btn-sm" onclick="disconnectEmail()">🔌 Déconnecter</button>
+            <div class="form-field">
+              <label>Access Token</label>
+              <input type="password" class="form-input" id="outlookToken" placeholder="EwAoA8l6B…">
             </div>
           </div>
-          <div id="email-list-container" class="emails-list"></div>
-          <div id="email-loading" style="display:none">
-            <div class="loading-overlay"><div class="loading-ring"></div><h3>Chargement…</h3></div>
-          </div>
-        </div>
-        <div id="email-detail-panel" class="panel-card" style="margin-top:1.5rem;display:none">
-          <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.75rem;margin-bottom:1.5rem">
-            <div id="email-detail-header"></div>
-            <div style="display:flex;gap:.5rem;flex-wrap:wrap">
-              <button class="btn-secondary btn-sm" onclick="summarizeSingleEmail()">📝 Résumer</button>
-              <button class="btn-secondary btn-sm" onclick="draftReply()">✍️ Rédiger réponse</button>
-              <button class="btn-pdf" onclick="closeEmailDetail()">✕ Fermer</button>
-            </div>
-          </div>
-          <div id="email-detail-body" class="output-body" style="border:1px solid var(--border);border-radius:var(--r);padding:1rem;background:var(--bg2);max-height:300px;overflow-y:auto"></div>
-          <div id="email-ai-output" class="output-area" style="display:none;margin-top:1.5rem">
-            <div class="output-topbar"><div class="output-label">🤖 Analyse IA</div><div class="output-actions"><button class="btn-pdf" onclick="copyOutput('email-ai-body')">📋 Copier</button></div></div>
-            <div id="email-ai-body" class="output-body"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ===== PANEL 5 : CONNEXION STOCKAGE ===== -->
-    <div class="feature-panel" id="panel-storage">
-      <div class="panel-card" id="storage-connect-panel">
-        <div class="panel-header">
-          <h2>🗄️ Connexion Stockage</h2>
-          <p>Connectez votre outil de stockage cloud pour organiser, exploiter et analyser vos ressources avec l'IA.</p>
         </div>
 
         <div class="form-field">
-          <label>Fournisseur de stockage</label>
-          <div class="provider-cards-grid">
-            <div class="prov-card active" id="store-prov-dropbox" onclick="selectStorageProvider('dropbox')">
-              <div class="prov-card-icon">📦</div>
-              <div class="prov-card-name">Dropbox</div>
-              <div class="prov-card-desc">Access Token</div>
-            </div>
-            <div class="prov-card" id="store-prov-gdrive" onclick="selectStorageProvider('gdrive')">
-              <div class="prov-card-icon">🟡</div>
-              <div class="prov-card-name">Google Drive</div>
-              <div class="prov-card-desc">OAuth Token</div>
-            </div>
-            <div class="prov-card" id="store-prov-onedrive" onclick="selectStorageProvider('onedrive')">
-              <div class="prov-card-icon">☁️</div>
-              <div class="prov-card-name">OneDrive</div>
-              <div class="prov-card-desc">Microsoft Graph</div>
-            </div>
-            <div class="prov-card" id="store-prov-manual" onclick="selectStorageProvider('manual')">
-              <div class="prov-card-icon">📁</div>
-              <div class="prov-card-name">Manuel</div>
-              <div class="prov-card-desc">Liste de fichiers</div>
-            </div>
-          </div>
+          <label>Nombre d'emails à charger</label>
+          <select class="form-select" id="emailCount">
+            <option value="5">5 emails</option>
+            <option value="10" selected>10 emails</option>
+            <option value="20">20 emails</option>
+            <option value="50">50 emails</option>
+          </select>
         </div>
 
-        <div id="store-cred-dropbox">
-          <div class="form-field">
-            <label for="dropbox-token">Dropbox Access Token</label>
-            <input type="password" id="dropbox-token" class="form-input" placeholder="sl.B...">
-          </div>
-          <div class="field-note" style="margin-bottom:1rem">💡 Obtenez votre token sur <strong>dropbox.com/developers</strong> → App Console → Generate access token.</div>
-        </div>
-        <div id="store-cred-gdrive" style="display:none">
-          <div class="form-field">
-            <label for="gdrive-token">Google Drive OAuth Token</label>
-            <input type="password" id="gdrive-token" class="form-input" placeholder="ya29.A0...">
-          </div>
-          <div class="field-note" style="margin-bottom:1rem">💡 Obtenez votre token sur <strong>console.cloud.google.com</strong> → Drive API → Credentials.</div>
-        </div>
-        <div id="store-cred-onedrive" style="display:none">
-          <div class="form-field">
-            <label for="onedrive-token">OneDrive / Microsoft Graph Token</label>
-            <input type="password" id="onedrive-token" class="form-input" placeholder="eyJ0eXAiOiJKV...">
-          </div>
-          <div class="field-note" style="margin-bottom:1rem">💡 Obtenez votre token sur <strong>portal.azure.com</strong> → Azure AD → App registrations.</div>
-        </div>
-        <div id="store-cred-manual" style="display:none">
-          <div class="form-field">
-            <label for="storage-manual-list">Liste de fichiers / structure de dossiers</label>
-            <textarea id="storage-manual-list" class="form-textarea" rows="10" placeholder="Collez ici votre liste de fichiers (noms, tailles, types, dates) ou la structure de votre dossier. L'IA vous aidera à les organiser et exploiter.&#10;&#10;Exemple :&#10;/documents/&#10;  rapport-2024.pdf (2.3 MB)&#10;  contrat-client-A.docx (450 KB)&#10;  données-ventes-Q4.xlsx (1.1 MB)&#10;/archives/&#10;  ..."></textarea>
-          </div>
-          <div class="step-nav">
-            <button class="btn-primary" onclick="processManualStorage()">🤖 Organiser avec l'IA</button>
-          </div>
-        </div>
-
-        <div id="storage-connect-btn-row" class="step-nav">
-          <button class="btn-primary" onclick="connectStorage()" id="btn-storage-connect">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
-            Connecter le stockage
+        <div class="step-nav">
+          <button class="btn btn-primary btn-lg" onclick="connectEmail()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
+            Connecter &amp; Charger
           </button>
         </div>
-      </div>
 
-      <!-- Storage Browser Panel -->
-      <div id="storage-browser-panel" style="display:none">
-        <div class="panel-card">
-          <div class="storage-header">
-            <div>
-              <h2 style="margin-bottom:.25rem">📁 Explorateur de fichiers</h2>
-              <div class="storage-path" id="storage-path-display">/</div>
-            </div>
-            <div style="display:flex;gap:.75rem;flex-wrap:wrap">
-              <button class="btn-secondary btn-sm" onclick="organizeWithAI()">🤖 Organiser avec IA</button>
-              <button class="btn-secondary btn-sm" onclick="analyzeStorageWithAI()">📊 Analyser le contenu</button>
-              <button class="btn-secondary btn-sm" onclick="disconnectStorage()">🔌 Déconnecter</button>
-            </div>
-          </div>
-          <div id="storage-file-list" class="storage-list"></div>
-          <div id="storage-loading" style="display:none">
-            <div class="loading-overlay"><div class="loading-ring"></div><h3>Chargement…</h3></div>
-          </div>
-        </div>
-        <div id="storage-ai-panel" class="output-area" style="margin-top:1.5rem;display:none">
-          <div class="output-topbar">
-            <div class="output-label">🤖 Analyse IA du stockage</div>
-            <div class="output-actions"><button class="btn-pdf" onclick="copyOutput('storage-ai-body')">📋 Copier</button><button class="btn-pdf" onclick="exportDocToPDF('storage-ai-body','analyse-stockage')">⬇️ PDF</button></div>
-          </div>
-          <div id="storage-ai-body" class="output-body"></div>
+        <div id="emailsWrap" style="display:none;margin-top:1.75rem">
+          <h3 style="font-size:1rem;margin-bottom:1rem;color:var(--t200)">📬 Emails récents</h3>
+          <div class="emails-wrap" id="emailsList"></div>
         </div>
       </div>
     </div>
 
-  </div><!-- /ai-wrapper -->
-</div>
+    <!-- ── PANEL 5 : STOCKAGE ── -->
+    <div class="f-panel" id="panel-storage">
+      <div class="panel-box">
+        <h2 class="panel-title">Stockage Cloud</h2>
+        <p class="panel-sub">Connectez votre stockage cloud pour analyser directement vos fichiers sans les télécharger manuellement.</p>
 
-<!-- =================================================================
-     PAGE TARIFS
-================================================================= -->
-<div id="page-pricing" class="page">
-  <div class="pricing-wrapper">
-    <div class="sec-header">
-      <span class="sec-badge">Tarifs</span>
-      <h1>Des forfaits pour chaque besoin</h1>
-      <p>Commencez gratuitement, évoluez selon votre activité. Sans engagement, résiliable à tout moment.</p>
+        <div class="form-field">
+          <label>Service de stockage</label>
+          <div class="prov-grid">
+            <div class="prov-card active" id="sprov-gdrive" onclick="selectStorageProvider('gdrive')">
+              <div class="prov-ico">📁</div>
+              <div class="prov-name">Google Drive</div>
+              <div class="prov-desc">Drive API v3</div>
+            </div>
+            <div class="prov-card" id="sprov-dropbox" onclick="selectStorageProvider('dropbox')">
+              <div class="prov-ico">💧</div>
+              <div class="prov-name">Dropbox</div>
+              <div class="prov-desc">Dropbox API v2</div>
+            </div>
+            <div class="prov-card" id="sprov-onedrive" onclick="selectStorageProvider('onedrive')">
+              <div class="prov-ico">☁️</div>
+              <div class="prov-name">OneDrive</div>
+              <div class="prov-desc">Microsoft Graph</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="storageConfigGdrive">
+          <div class="form-field">
+            <label>Access Token Google Drive (OAuth 2.0)</label>
+            <input type="password" class="form-input" id="gdriveToken" placeholder="ya29.A0…">
+          </div>
+          <div class="form-field">
+            <label>ID du dossier (laisser vide pour la racine)</label>
+            <input type="text" class="form-input" id="gdriveFolderId" placeholder="1BxiMVs0XRA5nFMdKvBd…">
+          </div>
+        </div>
+
+        <div id="storageConfigDropbox" style="display:none">
+          <div class="form-field">
+            <label>Access Token Dropbox</label>
+            <input type="password" class="form-input" id="dropboxToken" placeholder="sl.A0…">
+          </div>
+          <div class="form-field">
+            <label>Chemin du dossier (laisser vide pour la racine)</label>
+            <input type="text" class="form-input" id="dropboxPath" placeholder="/Documents/Entreprise">
+          </div>
+        </div>
+
+        <div id="storageConfigOnedrive" style="display:none">
+          <div class="form-field">
+            <label>Access Token OneDrive (Microsoft Graph)</label>
+            <input type="password" class="form-input" id="onedriveToken" placeholder="EwAoA8l6B…">
+          </div>
+        </div>
+
+        <div class="step-nav">
+          <button class="btn btn-primary btn-lg" onclick="connectStorage()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <polyline points="16 17 21 12 16 7"/>
+              <path d="M21 12H9"/>
+              <path d="M9 18H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4"/>
+            </svg>
+            Connecter &amp; Parcourir
+          </button>
+        </div>
+
+        <div id="storageWrap" style="display:none;margin-top:1.75rem">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem">
+            <h3 style="font-size:1rem;color:var(--t200)">📂 Fichiers disponibles</h3>
+            <button class="btn btn-sm btn-ghost" onclick="analyzeSelectedFiles()">📊 Analyser la sélection</button>
+          </div>
+          <div class="storage-wrap" id="storageList"></div>
+        </div>
+
+        <div class="output-box" id="storageOutput" style="display:none">
+          <div class="output-bar">
+            <span class="output-lbl">📂 Analyse cloud</span>
+            <div class="output-acts">
+              <button class="btn btn-sm btn-ghost" onclick="copyOutput('storageContent')">📋 Copier</button>
+              <button class="btn btn-sm btn-primary" onclick="exportPdf('storageContent')">⬇️ PDF</button>
+            </div>
+          </div>
+          <div class="output-body" id="storageContent"></div>
+        </div>
+      </div>
     </div>
 
-    <div class="pricing-cards">
-      <!-- Gratuit -->
+  </div>
+</div><!-- /page-ai -->
+
+
+<!-- ══════════════════════════════════════
+     PAGE : TARIFS
+══════════════════════════════════════ -->
+<div class="page" id="page-pricing">
+  <div class="pricing-page">
+
+    <div class="sec-head" style="padding-top:1rem">
+      <div class="sec-label" style="margin:0 auto 1.25rem"><span class="dot"></span>Tarification</div>
+      <h1>Des tarifs <span class="gradient-text">transparents</span></h1>
+      <p>Commencez gratuitement. Évoluez selon vos besoins. Sans surprise.</p>
+    </div>
+
+    <!-- GRILLE TARIFS -->
+    <div class="pricing-grid">
+
+      <!-- GRATUIT -->
       <div class="price-card">
-        <div class="plan-name">Gratuit</div>
-        <div class="plan-price"><span class="plan-amount">0€</span><span class="plan-per">/mois</span></div>
-        <div class="plan-tagline">Pour découvrir Archiva</div>
-        <div class="free-feature-note">🎁 Choisissez 3 fonctionnalités parmi les 5 disponibles</div>
-        <ul class="plan-list">
-          <li>3 modules IA au choix (sur 5)</li>
-          <li>10 opérations par mois</li>
-          <li>Fichiers jusqu'à 2 MB</li>
-          <li>Export PDF des résultats</li>
-          <li>Claude &amp; Mistral AI</li>
-          <li class="no">Accès à tous les modules</li>
-          <li class="no">Stockage &amp; email illimités</li>
+        <span class="price-name">Gratuit</span>
+        <span class="price-amount">0€</span>
+        <div class="price-per">pour toujours</div>
+        <p class="price-note">Idéal pour découvrir Archiva</p>
+        <ul class="price-list">
+          <li>5 documents / mois</li>
+          <li>Génération basique</li>
+          <li>Extraction texte (TXT, CSV)</li>
+          <li>1 graphique par rapport</li>
+          <li class="no">Connexion email</li>
+          <li class="no">Stockage cloud</li>
+          <li class="no">Export PDF illimité</li>
           <li class="no">Support prioritaire</li>
         </ul>
-        <button class="btn-plan btn-plan-free" onclick="showPage('ai')">Commencer gratuitement</button>
+        <button class="btn-price bp-free" onclick="showPage('ai')">Commencer gratuit</button>
       </div>
 
-      <!-- Pro -->
-      <div class="price-card popular">
-        <div class="popular-tag">⭐ Le plus populaire</div>
-        <div class="plan-name">Pro</div>
-        <div class="plan-price"><span class="plan-amount">57€</span><span class="plan-per">/mois</span></div>
-        <div class="plan-tagline">Pour les PME et indépendants</div>
-        <ul class="plan-list">
-          <li>Tous les 5 modules IA</li>
-          <li>100 opérations par mois</li>
-          <li>Fichiers jusqu'à 25 MB</li>
-          <li>Export PDF haute qualité</li>
-          <li>Claude &amp; Mistral AI</li>
-          <li>1 boîte mail connectée</li>
-          <li>1 stockage cloud connecté</li>
-          <li class="no">Opérations illimitées</li>
+      <!-- PRO -->
+      <div class="price-card pop">
+        <div class="price-badge badge-pop">⭐ Plus populaire</div>
+        <span class="price-name">Pro</span>
+        <span class="price-amount gradient-text">57€</span>
+        <div class="price-per">/mois par utilisateur</div>
+        <p class="price-note">Pour les professionnels et PMEs</p>
+        <ul class="price-list">
+          <li>Documents illimités</li>
+          <li>Tous types de génération</li>
+          <li>Extraction PDF, DOCX, XLSX</li>
+          <li>Rapports + graphiques illimités</li>
+          <li>Gmail &amp; Outlook connectés</li>
+          <li>Google Drive, Dropbox, OneDrive</li>
+          <li>Export PDF illimité</li>
+          <li class="no">Support dédié</li>
         </ul>
-        <button class="btn-plan btn-plan-pro" onclick="showPage('contact')">Souscrire Pro</button>
+        <button class="btn-price bp-pro" onclick="showPage('contact')">Démarrer Pro</button>
       </div>
 
-      <!-- Entreprise -->
+      <!-- ENTREPRISE -->
       <div class="price-card">
-        <div class="plan-name">Entreprise</div>
-        <div class="plan-price"><span class="plan-amount">147€</span><span class="plan-per">/mois</span></div>
-        <div class="plan-tagline">Pour les grandes organisations</div>
-        <ul class="plan-list">
-          <li>Tous les 5 modules IA</li>
-          <li>500 opérations par mois</li>
-          <li>Fichiers jusqu'à 100 MB</li>
-          <li>Export PDF / Word / Excel</li>
-          <li>Claude &amp; Mistral AI (premium)</li>
-          <li>5 boîtes mail connectées</li>
-          <li>3 stockages cloud connectés</li>
+        <span class="price-name">Entreprise</span>
+        <span class="price-amount">147€</span>
+        <div class="price-per">/mois par utilisateur</div>
+        <p class="price-note">Pour les grandes équipes</p>
+        <ul class="price-list">
+          <li>Tout le plan Pro</li>
+          <li>Jusqu'à 50 utilisateurs</li>
+          <li>Tableau de bord admin</li>
+          <li>Audit trail complet</li>
+          <li>SLA 99.9% garanti</li>
+          <li>Intégrations sur mesure</li>
+          <li>Formation &amp; onboarding</li>
           <li>Support dédié 24/7</li>
         </ul>
-        <button class="btn-plan btn-plan-ent" onclick="showPage('contact')">Contacter l'équipe</button>
+        <button class="btn-price bp-ent" onclick="showPage('contact')">Contacter les ventes</button>
       </div>
 
-      <!-- Sur devis -->
+      <!-- SUR DEVIS -->
       <div class="price-card custom">
-        <div class="custom-tag">♾️ Sur mesure</div>
-        <div class="plan-name">Sur devis</div>
-        <div class="plan-price"><span class="plan-amount custom-price">Sur devis</span></div>
-        <div class="plan-tagline">Tarif défini selon vos besoins spécifiques</div>
-        <ul class="plan-list">
-          <li>Opérations <strong>illimitées</strong></li>
-          <li>Fichiers jusqu'à 500 MB</li>
-          <li>Tous les modules IA</li>
-          <li>Export tous formats</li>
-          <li>Modèles IA ultra-premium</li>
-          <li>Boîtes mail illimitées</li>
-          <li>Stockages illimités</li>
-          <li>Account manager dédié &amp; SLA</li>
+        <div class="price-badge badge-custom">🏢 Sur mesure</div>
+        <span class="price-name">Sur devis</span>
+        <span class="price-amount gradient-text-indigo">∞</span>
+        <div class="price-per">selon vos besoins</div>
+        <p class="price-note">Grandes organisations &amp; groupes</p>
+        <ul class="price-list">
+          <li>Utilisateurs illimités</li>
+          <li>Déploiement on-premise</li>
+          <li>API privée dédiée</li>
+          <li>Modèle IA personnalisé</li>
+          <li>Intégrations ERP / CRM</li>
+          <li>Conformité ISO 27001</li>
+          <li>DPO dédié RGPD</li>
+          <li>SLA contractuel</li>
         </ul>
-        <button class="btn-plan btn-plan-custom" onclick="showPage('contact')">Demander un devis</button>
-        <p class="custom-note">Prix établi en direct avec notre équipe selon votre volume et vos besoins spécifiques.</p>
+        <button class="btn-price bp-custom" onclick="showPage('contact')">Demander un devis</button>
       </div>
     </div>
 
-    <!-- Comparison Table -->
-    <div class="comparison-section">
-      <h2>Comparaison détaillée des forfaits</h2>
-      <div class="comp-table-wrap">
+    <!-- TABLEAU COMPARATIF -->
+    <div class="comp-section">
+      <h2>Comparaison <span class="gradient-text">détaillée</span></h2>
+      <div class="comp-wrap">
         <table class="comp-table">
           <thead>
             <tr>
               <th>Fonctionnalité</th>
               <th>Gratuit</th>
-              <th class="col-popular">Pro — 57€</th>
-              <th>Entreprise — 147€</th>
+              <th class="col-pop">Pro</th>
+              <th>Entreprise</th>
               <th class="col-custom">Sur devis</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td>Modules IA disponibles</td><td>3 au choix</td><td class="col-popular">Tous (5)</td><td>Tous (5)</td><td class="col-custom">Tous (5)</td></tr>
-            <tr><td>Opérations / mois</td><td>10</td><td class="col-popular">100</td><td>500</td><td class="col-custom">♾️ Illimitées</td></tr>
-            <tr><td>Taille max fichier</td><td>2 MB</td><td class="col-popular">25 MB</td><td>100 MB</td><td class="col-custom">500 MB</td></tr>
-            <tr><td>Génération de documents</td><td>✓</td><td class="col-popular">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
-            <tr><td>Extraction &amp; Résumé</td><td>✓</td><td class="col-popular">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
-            <tr><td>Analyse &amp; Rapports</td><td>✓</td><td class="col-popular">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
-            <tr><td>Connexion Email</td><td>✗</td><td class="col-popular">1 boîte</td><td>5 boîtes</td><td class="col-custom">Illimité</td></tr>
-            <tr><td>Connexion Stockage</td><td>✗</td><td class="col-popular">1 service</td><td>3 services</td><td class="col-custom">Illimité</td></tr>
-            <tr><td>Export PDF</td><td>✓</td><td class="col-popular">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
-            <tr><td>Export Word / Excel</td><td>✗</td><td class="col-popular">✗</td><td>✓</td><td class="col-custom">✓</td></tr>
-            <tr><td>Support</td><td>Email</td><td class="col-popular">Prioritaire</td><td>Dédié 24/7</td><td class="col-custom">Account manager</td></tr>
-            <tr><td>SLA garanti</td><td>✗</td><td class="col-popular">✗</td><td>✗</td><td class="col-custom">✓</td></tr>
+            <tr><td>Documents générés / mois</td><td>5</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Extraction de fichiers</td><td>TXT, CSV</td><td class="col-pop">Tous formats</td><td>Tous formats</td><td class="col-custom">Tous formats</td></tr>
+            <tr><td>Rapports avec graphiques</td><td>1 / rapport</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Connexion email (Gmail / Outlook)</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
+            <tr><td>Stockage cloud (Drive / Dropbox / OneDrive)</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
+            <tr><td>Export PDF</td><td>5 / mois</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Fournisseur IA (Claude / Mistral)</td><td>✓</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓ + personnalisé</td></tr>
+            <tr><td>Tableau de bord admin</td><td>✗</td><td class="col-pop">✗</td><td>✓</td><td class="col-custom">✓</td></tr>
+            <tr><td>Support</td><td>Communauté</td><td class="col-pop">Email</td><td>Dédié 24/7</td><td class="col-custom">Account manager</td></tr>
+            <tr><td>SLA garanti</td><td>✗</td><td class="col-pop">✗</td><td>99.9%</td><td class="col-custom">Contractuel</td></tr>
           </tbody>
         </table>
       </div>
     </div>
 
     <!-- FAQ -->
-    <div class="faq-section">
-      <h2>Questions fréquentes</h2>
-      <div class="faq-list">
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)"><span>Mes données sont-elles sécurisées avec Archiva ?</span><span class="faq-icon">+</span></button>
-          <div class="faq-a"><p>Oui, totalement. Vos fichiers, documents et clés API sont traités uniquement dans votre navigateur et envoyés directement à l'API IA que vous avez configurée (Anthropic ou Mistral). Archiva ne stocke jamais vos données sur ses serveurs. Tout reste confidentiel et local à votre session de navigation.</p></div>
+    <div class="sec-head">
+      <div class="sec-label" style="margin:0 auto 1.25rem"><span class="dot"></span>FAQ</div>
+      <h2>Questions <span class="gradient-text">fréquentes</span></h2>
+    </div>
+    <div class="faq-wrap">
+      <div class="faq-item open">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Dois-je fournir ma propre clé API ?
+          <span class="faq-ico">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Oui. Archiva utilise votre clé API Claude (Anthropic) ou Mistral AI. Vous gardez ainsi le contrôle total de vos coûts et de vos données. Votre clé est stockée en mémoire de session et n'est jamais transmise à nos serveurs.</p>
         </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)"><span>Puis-je choisir quels modules activer sur le plan Gratuit ?</span><span class="faq-icon">+</span></button>
-          <div class="faq-a"><p>Oui. Avec le plan Gratuit, vous choisissez librement 3 des 5 modules IA : génération de documents, extraction, analyse, email ou stockage. Vous pouvez modifier votre choix de modules à tout moment dans vos paramètres.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Mes données sont-elles sécurisées ?
+          <span class="faq-ico">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Archiva est 100% conforme RGPD. Le traitement des fichiers s'effectue côté client (dans votre navigateur). Seul le contenu textuel extrait est envoyé à l'API IA de votre choix. Aucune donnée n'est stockée sur nos serveurs.</p>
         </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)"><span>Ai-je besoin de ma propre clé API IA ?</span><span class="faq-icon">+</span></button>
-          <div class="faq-a"><p>Oui, Archiva fonctionne avec votre propre clé API Anthropic (Claude) ou Mistral AI. Cela garantit que vos données sont traitées directement par le fournisseur IA, sans aucun intermédiaire. Vos coûts d'inférence sont directement facturés sur votre compte IA, séparément de l'abonnement Archiva.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Puis-je annuler à tout moment ?
+          <span class="faq-ico">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Oui, sans engagement. Vous pouvez annuler votre abonnement à tout moment depuis votre espace client. Aucune pénalité, aucun frais caché.</p>
         </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)"><span>Comment fonctionne la connexion à ma boîte mail ?</span><span class="faq-icon">+</span></button>
-          <div class="faq-a"><p>Archiva utilise l'API officielle de votre fournisseur email (Gmail API, Microsoft Graph pour Outlook). Vous fournissez un token d'accès OAuth2 que vous générez depuis votre console développeur. Archiva lit vos emails pour les analyser avec l'IA, mais ne stocke ni vos emails ni vos tokens.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Quels formats de fichiers sont supportés ?
+          <span class="faq-ico">+</span>
+        </button>
+        <div class="faq-a">
+          <p>PDF, DOCX (Word), XLSX (Excel), CSV et TXT. Tous les fichiers sont lus directement dans votre navigateur via des librairies open source (pdf.js, mammoth.js, SheetJS).</p>
         </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)"><span>Puis-je résilier à tout moment ?</span><span class="faq-icon">+</span></button>
-          <div class="faq-a"><p>Oui, sans engagement et sans frais de résiliation. Vous pouvez résilier votre abonnement à tout moment. La résiliation prend effet à la fin de la période de facturation en cours.</p></div>
-        </div>
-        <div class="faq-item">
-          <button class="faq-q" onclick="toggleFaq(this)"><span>Quels formats de fichiers sont supportés ?</span><span class="faq-icon">+</span></button>
-          <div class="faq-a"><p>Archiva supporte : PDF, Word (.docx/.doc), Excel (.xlsx/.xls), CSV, et texte (.txt). Vous pouvez également coller du texte directement dans l'interface pour tous les modules.</p></div>
+      </div>
+      <div class="faq-item">
+        <button class="faq-q" onclick="toggleFaq(this)">
+          Y a-t-il une période d'essai pour les plans payants ?
+          <span class="faq-ico">+</span>
+        </button>
+        <div class="faq-a">
+          <p>Le plan Gratuit est disponible sans limite de temps. Pour les plans Pro et Entreprise, nous proposons une démo personnalisée sur demande. Contactez-nous à a.e.l.corporation@hotmail.com ou au 06 21 64 23 29.</p>
         </div>
       </div>
     </div>
+
   </div>
-</div>
+</div><!-- /page-pricing -->
 
-<!-- =================================================================
-     PAGE CONTACT
-================================================================= -->
-<div id="page-contact" class="page">
-  <div class="contact-wrapper">
-    <div class="sec-header">
-      <span class="sec-badge">Contact</span>
-      <h1>Parlons de vos besoins</h1>
-      <p>Notre équipe est disponible pour répondre à vos questions et vous accompagner.</p>
+
+<!-- ══════════════════════════════════════
+     PAGE : CONTACT
+══════════════════════════════════════ -->
+<div class="page" id="page-contact">
+  <div class="contact-page">
+
+    <div class="sec-head" style="padding-top:1rem">
+      <div class="sec-label" style="margin:0 auto 1.25rem"><span class="dot"></span>Nous contacter</div>
+      <h1>Parlez-nous de votre <span class="gradient-text">projet</span></h1>
+      <p>Notre équipe répond sous 24h. Pour toute urgence : 06 21 64 23 29.</p>
     </div>
 
-    <div class="contact-layout">
-      <div class="contact-info-panel">
-        <h2>Coordonnées</h2>
-        <div class="contact-item">
-          <div class="ci-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    <div class="contact-grid">
+      <!-- Infos -->
+      <div class="contact-info">
+        <h2>Informations de contact</h2>
+
+        <div class="ci-item">
+          <div class="ci-ico">
+            <svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+              <polyline points="22,6 12,13 2,6"/>
+            </svg>
           </div>
-          <div class="ci-content">
-            <strong>Email</strong>
-            <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="ci-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.58 1h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L7.91 8.56a16 16 0 0 0 5.55 5.55l1.92-1.92a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 14.92z"/></svg>
-          </div>
-          <div class="ci-content">
-            <strong>Téléphone</strong>
-            <a href="tel:+33621642329">06 21 64 23 29</a>
+          <div>
+            <div class="ci-label">Email</div>
+            <div class="ci-val"><a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a></div>
           </div>
         </div>
-        <div class="contact-item">
-          <div class="ci-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+
+        <div class="ci-item">
+          <div class="ci-ico">
+            <svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.4 2 2 0 0 1 3.9 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/>
+            </svg>
           </div>
-          <div class="ci-content">
-            <strong>Disponibilité</strong>
-            <span>Lundi — Vendredi, 9h – 18h</span>
-          </div>
-        </div>
-        <div class="contact-item">
-          <div class="ci-icon">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          </div>
-          <div class="ci-content">
-            <strong>Société</strong>
-            <span>A.E.L. Corporation</span>
+          <div>
+            <div class="ci-label">Téléphone</div>
+            <div class="ci-val"><a href="tel:+33621642329">06 21 64 23 29</a></div>
           </div>
         </div>
-        <div class="response-guarantee">
-          <div class="rg-badge">⚡ Réponse garantie sous 24h ouvrées</div>
-          <p>Nous nous engageons à répondre à toutes vos demandes dans un délai de 24 heures ouvrées.</p>
+
+        <div class="ci-item">
+          <div class="ci-ico">
+            <svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24">
+              <rect x="2" y="7" width="20" height="14" rx="2"/>
+              <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ci-label">Entreprise</div>
+            <div class="ci-val">A.E.L. Corporation</div>
+          </div>
         </div>
+
+        <div class="ci-item">
+          <div class="ci-ico">
+            <svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/>
+              <polyline points="12 6 12 12 16 14"/>
+            </svg>
+          </div>
+          <div>
+            <div class="ci-label">Disponibilité</div>
+            <div class="ci-val">Lun–Ven, 9h–18h<br>Réponse sous 24h</div>
+          </div>
+        </div>
+
+        <div class="contact-guarantee">
+          <div class="cg-badge">✓ Garanti sans engagement</div>
+          <p>Aucune obligation à l'issue de votre demande. Démonstration gratuite disponible.</p>
+        </div>
+
         <div class="contact-rgpd">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;margin-top:1px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Vos données de contact sont traitées conformément à notre <a href="#" onclick="showModal('privacy');return false;">politique RGPD</a>.
+          <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2"/>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+          </svg>
+          Données traitées conformément au RGPD.
+          <a onclick="openModal('modalRgpd')">Politique de confidentialité →</a>
         </div>
       </div>
 
-      <div class="contact-form-panel">
+      <!-- Formulaire -->
+      <div class="contact-form-wrap">
         <h2>Envoyer un message</h2>
-        <form id="contact-form" onsubmit="submitContact(event)" novalidate>
-          <div class="form-row-2">
+
+        <div id="contactFormArea">
+          <div class="form-grid-2">
             <div class="form-field">
-              <label for="cf-firstname">Prénom *</label>
-              <input type="text" id="cf-firstname" class="form-input" placeholder="Jean" required>
+              <label>Prénom *</label>
+              <input type="text" class="form-input" id="cFirstname" placeholder="Jean">
             </div>
             <div class="form-field">
-              <label for="cf-lastname">Nom *</label>
-              <input type="text" id="cf-lastname" class="form-input" placeholder="Dupont" required>
+              <label>Nom *</label>
+              <input type="text" class="form-input" id="cLastname" placeholder="Dupont">
+            </div>
+          </div>
+          <div class="form-grid-2">
+            <div class="form-field">
+              <label>Email professionnel *</label>
+              <input type="email" class="form-input" id="cEmail" placeholder="jean.dupont@entreprise.fr">
+            </div>
+            <div class="form-field">
+              <label>Téléphone</label>
+              <input type="tel" class="form-input" id="cPhone" placeholder="06 00 00 00 00">
             </div>
           </div>
           <div class="form-field">
-            <label for="cf-email">Email *</label>
-            <input type="email" id="cf-email" class="form-input" placeholder="jean.dupont@entreprise.com" required>
+            <label>Entreprise</label>
+            <input type="text" class="form-input" id="cCompany" placeholder="Nom de votre entreprise">
           </div>
           <div class="form-field">
-            <label for="cf-company">Société</label>
-            <input type="text" id="cf-company" class="form-input" placeholder="Votre entreprise">
-          </div>
-          <div class="form-field">
-            <label for="cf-phone">Téléphone</label>
-            <input type="tel" id="cf-phone" class="form-input" placeholder="06 XX XX XX XX">
-          </div>
-          <div class="form-field">
-            <label for="cf-subject">Sujet *</label>
-            <select id="cf-subject" class="form-input form-select" required>
-              <option value="">— Choisissez un sujet —</option>
-              <option value="demo">Demande de démonstration</option>
-              <option value="pro">Souscription forfait Pro (57€)</option>
-              <option value="enterprise">Offre Entreprise (147€)</option>
-              <option value="devis">Demande de devis sur mesure</option>
-              <option value="support">Support technique</option>
-              <option value="partnership">Partenariat</option>
-              <option value="other">Autre question</option>
+            <label>Sujet *</label>
+            <select class="form-select" id="cSubject">
+              <option value="">Sélectionnez un sujet</option>
+              <option>Demande de démonstration</option>
+              <option>Renseignements tarifs</option>
+              <option>Demande de devis entreprise</option>
+              <option>Support technique</option>
+              <option>Partenariat</option>
+              <option>Autre</option>
             </select>
           </div>
           <div class="form-field">
-            <label for="cf-message">Message *</label>
-            <textarea id="cf-message" class="form-textarea" rows="5" placeholder="Décrivez votre besoin, votre projet ou votre question…" required></textarea>
+            <label>Message *</label>
+            <textarea class="form-textarea" id="cMessage" rows="5"
+              placeholder="Décrivez votre besoin, votre volume de documents, vos contraintes techniques…"></textarea>
           </div>
           <div class="form-field">
-            <label class="checkbox-label">
-              <input type="checkbox" id="cf-consent" required>
-              <span>J'accepte que mes données personnelles soient traitées conformément à la <a href="#" onclick="showModal('privacy');return false;">politique de confidentialité</a> d'Archiva pour traiter ma demande. *</span>
+            <label class="checkbox-wrap">
+              <input type="checkbox" id="cRgpd">
+              J'accepte que mes données soient traitées conformément à la
+              <a onclick="openModal('modalRgpd')">politique de confidentialité</a>
+              d'A.E.L. Corporation. *
             </label>
           </div>
-          <button type="submit" class="btn-primary btn-full" id="btn-contact-submit">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          <button class="btn btn-primary btn-full btn-lg" onclick="submitContact()">
+            <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
             Envoyer le message
           </button>
-        </form>
-        <div id="form-success" class="form-success" style="display:none">
+        </div>
+
+        <div class="form-success" id="contactSuccess" style="display:none">
           <div class="fs-icon">✅</div>
           <h3>Message envoyé !</h3>
-          <p>Merci pour votre message. Notre équipe vous répondra dans les 24 heures ouvrées à l'adresse indiquée.</p>
-          <button class="btn-secondary" onclick="resetContactForm()">Envoyer un autre message</button>
+          <p>Merci ! Notre équipe vous répondra dans les 24h à <strong id="successEmail"></strong>.</p>
+          <button class="btn btn-ghost" onclick="resetContact()">Envoyer un autre message</button>
         </div>
       </div>
     </div>
   </div>
-</div>
+</div><!-- /page-contact -->
 
-<!-- =================================================================
-     FOOTER
-================================================================= -->
-<footer class="footer" role="contentinfo">
-  <div class="footer-inner">
-    <div class="footer-top">
-      <div class="footer-brand">
-        <div class="footer-logo" onclick="showPage('home')">
-          <div class="logo-mark" style="width:30px;height:30px">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M21 8v13H3V8"/><path d="M23 3H1v5h22V3z"/><path d="M10 12h4"/></svg>
-          </div>
-          <span>Archiva</span>
-        </div>
-        <p class="footer-desc">La plateforme SaaS de traitement documentaire IA pour entreprises. Conforme RGPD. Données 100% privées.</p>
-        <p class="footer-company">A.E.L. Corporation</p>
-      </div>
-      <div class="footer-links">
-        <div class="footer-col">
-          <h4>Produit</h4>
-          <a onclick="showPage('ai');switchFeature('generation')">Génération docs</a>
-          <a onclick="showPage('ai');switchFeature('extraction')">Extraction</a>
-          <a onclick="showPage('ai');switchFeature('analysis')">Analyse &amp; Rapports</a>
-          <a onclick="showPage('ai');switchFeature('email')">Connexion Email</a>
-          <a onclick="showPage('ai');switchFeature('storage')">Connexion Stockage</a>
-        </div>
-        <div class="footer-col">
-          <h4>Entreprise</h4>
-          <a onclick="showPage('pricing')">Tarifs</a>
-          <a onclick="showPage('contact')">Contact</a>
-          <a onclick="showPage('home')">À propos</a>
-          <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a>
-          <a href="tel:+33621642329">06 21 64 23 29</a>
-        </div>
-        <div class="footer-col">
-          <h4>Légal &amp; RGPD</h4>
-          <a href="#" onclick="showModal('privacy');return false;">Politique de confidentialité</a>
-          <a href="#" onclick="showModal('legal');return false;">Mentions légales</a>
-          <a href="#" onclick="showModal('cgv');return false;">CGV</a>
-          <a href="#" onclick="showModal('cookies');return false;">Gestion des cookies</a>
-        </div>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span>© 2025 Archiva — A.E.L. Corporation. Tous droits réservés.</span>
-      <span class="footer-rgpd">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        Conforme RGPD · Données traitées dans votre navigateur
-      </span>
-    </div>
-  </div>
-</footer>
 
-<!-- =================================================================
+<!-- ══════════════════════════════════════
      MODALS
-================================================================= -->
+══════════════════════════════════════ -->
 
-<!-- Privacy Policy -->
-<div id="modal-privacy" class="modal-overlay" onclick="closeModalOutside(event,'privacy')">
-  <div class="modal-box" role="dialog" aria-modal="true" aria-label="Politique de confidentialité">
+<!-- RGPD -->
+<div class="modal-overlay" id="modalRgpd">
+  <div class="modal-box">
     <div class="modal-head">
-      <h2>Politique de Confidentialité</h2>
-      <button class="modal-close-btn" onclick="closeModal('privacy')" aria-label="Fermer">✕</button>
+      <h2>Politique de confidentialité &amp; RGPD</h2>
+      <button class="modal-close" onclick="closeModal('modalRgpd')">✕</button>
     </div>
-    <div class="modal-scroll">
-      <p class="modal-updated">Dernière mise à jour : Mai 2025</p>
-      <h3>1. Responsable du traitement</h3>
-      <p>A.E.L. Corporation, exploitant la plateforme Archiva, est le responsable du traitement de vos données personnelles au sens du RGPD (Règlement UE 2016/679). Contact DPO : <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a></p>
-      <h3>2. Données collectées</h3>
-      <p>Archiva collecte uniquement les données que vous fournissez volontairement via le formulaire de contact (prénom, nom, email, société, message) et les préférences de cookies (stockées localement via localStorage).</p>
-      <p><strong>Important — Traitement documentaire :</strong> Vos fichiers, documents, clés API IA, tokens email et tokens de stockage ne sont JAMAIS transmis à nos serveurs. Ils sont utilisés uniquement dans votre navigateur et envoyés directement aux APIs que vous avez configurées. Archiva n'a aucun accès à vos données professionnelles.</p>
-      <h3>3. Finalités du traitement</h3>
+    <div class="modal-body">
+      <p class="modal-date">Dernière mise à jour : 1er janvier 2025</p>
+      <h3>Responsable du traitement</h3>
+      <p>A.E.L. Corporation — a.e.l.corporation@hotmail.com — 06 21 64 23 29.</p>
+      <h3>Données collectées</h3>
+      <p>Lors de l'utilisation du formulaire de contact : nom, prénom, email, téléphone, entreprise et message. Ces données sont uniquement utilisées pour répondre à votre demande.</p>
+      <h3>Clés API</h3>
+      <p>Les clés API (Claude, Mistral) sont stockées exclusivement en mémoire de session dans votre navigateur. Elles ne sont jamais transmises ni stockées sur nos serveurs.</p>
+      <h3>Fichiers uploadés</h3>
+      <p>Le traitement des fichiers (PDF, DOCX, etc.) s'effectue dans votre navigateur. Seul le contenu textuel extrait est envoyé à l'API IA de votre choix via des appels directs.</p>
+      <h3>Cookies</h3>
+      <p>Nous utilisons uniquement des cookies fonctionnels essentiels. Aucun cookie de tracking ou publicitaire sans consentement explicite.</p>
+      <h3>Vos droits (RGPD)</h3>
       <ul>
-        <li>Traitement des demandes de contact et devis</li>
-        <li>Amélioration du service Archiva</li>
-        <li>Respect de nos obligations légales</li>
+        <li>Droit d'accès, de rectification et d'effacement</li>
+        <li>Droit à la portabilité et à la limitation du traitement</li>
+        <li>Droit d'opposition</li>
       </ul>
-      <h3>4. Base légale (RGPD Art. 6)</h3>
-      <p>Le traitement repose sur votre consentement explicite (Art. 6.1.a) pour le formulaire de contact et les cookies de préférences, et sur l'exécution du contrat (Art. 6.1.b) pour la fourniture du service.</p>
-      <h3>5. Durée de conservation</h3>
-      <p>Les données de contact sont conservées 3 ans après la dernière interaction. Les préférences cookies expirent après 13 mois (conformément aux recommandations CNIL).</p>
-      <h3>6. Vos droits RGPD</h3>
-      <p>Vous disposez des droits d'accès, rectification, effacement ("droit à l'oubli"), portabilité, opposition et limitation du traitement. Pour les exercer : <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a>. Réponse garantie dans un délai de 30 jours.</p>
-      <h3>7. Cookies utilisés</h3>
-      <p>Archiva utilise uniquement des cookies essentiels (fonctionnement du site) et des cookies de préférences (mémorisation du consentement). Aucun cookie publicitaire, de traçage ou tiers.</p>
-      <h3>8. Réclamation auprès de la CNIL</h3>
-      <p>Vous pouvez introduire une réclamation auprès de la <strong>CNIL</strong> (Commission Nationale de l'Informatique et des Libertés) — <a href="https://www.cnil.fr" target="_blank" rel="noopener">www.cnil.fr</a></p>
-      <h3>9. Transferts hors UE</h3>
-      <p>Vos données de contact restent hébergées en Europe. Concernant vos données de traitement IA : elles sont envoyées directement à Anthropic (USA) ou Mistral AI (France) selon votre choix, dans le cadre de leurs propres politiques de confidentialité. Anthropic est soumis au RGPD via des clauses contractuelles types (SCCs).</p>
+      <p>Pour exercer vos droits : a.e.l.corporation@hotmail.com</p>
+      <h3>Hébergement</h3>
+      <p>Données hébergées en France. Aucun transfert hors UE sans garanties appropriées.</p>
     </div>
   </div>
 </div>
 
-<!-- Mentions Légales -->
-<div id="modal-legal" class="modal-overlay" onclick="closeModalOutside(event,'legal')">
-  <div class="modal-box" role="dialog" aria-modal="true">
+<!-- CGU -->
+<div class="modal-overlay" id="modalCgu">
+  <div class="modal-box">
     <div class="modal-head">
-      <h2>Mentions Légales</h2>
-      <button class="modal-close-btn" onclick="closeModal('legal')">✕</button>
+      <h2>Conditions Générales d'Utilisation</h2>
+      <button class="modal-close" onclick="closeModal('modalCgu')">✕</button>
     </div>
-    <div class="modal-scroll">
-      <h3>Éditeur du site</h3>
-      <p><strong>Raison sociale :</strong> A.E.L. Corporation<br>
-         <strong>Forme juridique :</strong> Entreprise individuelle / Société<br>
-         <strong>Email :</strong> <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a><br>
-         <strong>Téléphone :</strong> 06 21 64 23 29</p>
+    <div class="modal-body">
+      <p class="modal-date">Version du 1er janvier 2025</p>
+      <h3>1. Objet</h3>
+      <p>Les présentes CGU régissent l'utilisation de la plateforme Archiva, éditée par A.E.L. Corporation.</p>
+      <h3>2. Accès au service</h3>
+      <p>L'accès aux fonctionnalités IA nécessite une clé API valide (Claude/Anthropic ou Mistral AI). L'utilisateur est seul responsable de l'utilisation et de la sécurité de sa clé.</p>
+      <h3>3. Responsabilités</h3>
+      <p>A.E.L. Corporation ne saurait être tenu responsable des contenus générés par les modèles d'IA tiers. L'utilisateur est seul responsable de l'utilisation des documents générés.</p>
+      <h3>4. Propriété intellectuelle</h3>
+      <p>Le code source, le design et la marque Archiva sont la propriété exclusive d'A.E.L. Corporation.</p>
+      <h3>5. Données personnelles</h3>
+      <p>Voir notre <a onclick="closeModal('modalCgu');openModal('modalRgpd')">Politique de confidentialité</a>.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('modalCgu')">Fermer</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MENTIONS LÉGALES -->
+<div class="modal-overlay" id="modalMentions">
+  <div class="modal-box">
+    <div class="modal-head">
+      <h2>Mentions légales</h2>
+      <button class="modal-close" onclick="closeModal('modalMentions')">✕</button>
+    </div>
+    <div class="modal-body">
+      <h3>Éditeur</h3>
+      <p><strong>A.E.L. Corporation</strong><br>
+      Email : a.e.l.corporation@hotmail.com<br>
+      Téléphone : 06 21 64 23 29</p>
       <h3>Directeur de la publication</h3>
       <p>A.E.L. Corporation</p>
       <h3>Hébergement</h3>
-      <p>Le site Archiva est hébergé par un prestataire conforme aux exigences légales françaises et européennes (RGPD, Loi pour la Confiance dans l'Économie Numérique).</p>
+      <p>Le site est hébergé en France sur infrastructure sécurisée conforme au RGPD.</p>
       <h3>Propriété intellectuelle</h3>
-      <p>L'ensemble du contenu du site Archiva (textes, graphiques, logo, code source, structure, design) est protégé par le droit d'auteur et appartient à A.E.L. Corporation. Toute reproduction, représentation, modification ou utilisation sans autorisation expresse écrite est strictement interdite et constitue une contrefaçon sanctionnée par le Code de la propriété intellectuelle.</p>
-      <h3>Limitation de responsabilité</h3>
-      <p>Les documents et analyses générés par Archiva sont fournis à titre informatif et d'aide à la décision. A.E.L. Corporation ne saurait être tenu responsable des décisions prises sur la base de ces contenus générés par intelligence artificielle. L'utilisateur demeure seul responsable de l'utilisation et de la validation des résultats obtenus.</p>
-      <h3>Données personnelles</h3>
-      <p>Conformément à la loi Informatique et Libertés du 6 janvier 1978 modifiée et au RGPD (Règlement UE 2016/679), vous disposez de droits sur vos données. Voir notre <a href="#" onclick="closeModal('legal');showModal('privacy');return false;">politique de confidentialité</a>.</p>
-      <h3>Droit applicable et juridiction</h3>
-      <p>Ce site est soumis au droit français. En cas de litige relatif à l'utilisation du site ou de ses services, les juridictions françaises seront exclusivement compétentes.</p>
-      <h3>Médiation de la consommation</h3>
-      <p>Conformément aux articles L.616-1 et R.616-1 du Code de la consommation, en cas de litige non résolu, vous pouvez recourir gratuitement à un médiateur de la consommation. Contact préalable obligatoire : <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a></p>
+      <p>L'ensemble des éléments du site Archiva sont la propriété exclusive d'A.E.L. Corporation. Toute reproduction est interdite sans autorisation écrite préalable.</p>
+      <h3>Loi applicable</h3>
+      <p>Les présentes mentions légales sont soumises au droit français.</p>
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="closeModal('modalMentions')">Fermer</button>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Cookie Preferences -->
-<div id="modal-cookies" class="modal-overlay" onclick="closeModalOutside(event,'cookies')">
-  <div class="modal-box" role="dialog" aria-modal="true">
+<!-- PRÉFÉRENCES COOKIES -->
+<div class="modal-overlay" id="modalCookies">
+  <div class="modal-box">
     <div class="modal-head">
-      <h2>Gestion des cookies</h2>
-      <button class="modal-close-btn" onclick="closeModal('cookies')">✕</button>
+      <h2>Préférences de cookies</h2>
+      <button class="modal-close" onclick="closeModal('modalCookies')">✕</button>
     </div>
-    <div class="modal-scroll">
-      <p>Archiva respecte votre vie privée. Configurez vos préférences ci-dessous :</p>
-      <div class="cookie-pref-item">
-        <div class="cpi-info">
+    <div class="modal-body">
+      <p>Gérez vos préférences. Les cookies essentiels sont requis pour le bon fonctionnement du site.</p>
+
+      <div class="cpref-item">
+        <div class="cpref-info">
           <strong>Cookies essentiels</strong>
           <p>Nécessaires au fonctionnement du site. Ne peuvent pas être désactivés.</p>
         </div>
-        <div class="toggle on disabled" aria-label="Toujours actif"><span class="toggle-knob"></span></div>
+        <div class="toggle on disabled"><div class="toggle-knob"></div></div>
       </div>
-      <div class="cookie-pref-item">
-        <div class="cpi-info">
-          <strong>Cookies de préférences</strong>
-          <p>Mémorisent vos réglages (consentement, langue, thème). Expiration : 13 mois.</p>
-        </div>
-        <div class="toggle" id="toggle-pref" onclick="toggleCookiePref('pref')" role="switch" aria-checked="false"><span class="toggle-knob"></span></div>
-      </div>
-      <div class="cookie-pref-item">
-        <div class="cpi-info">
+
+      <div class="cpref-item">
+        <div class="cpref-info">
           <strong>Cookies analytiques</strong>
-          <p>Nous aident à améliorer Archiva (données anonymisées, sans identification personnelle).</p>
+          <p>Nous aident à comprendre comment vous utilisez le site (données anonymisées).</p>
         </div>
-        <div class="toggle" id="toggle-analytics" onclick="toggleCookiePref('analytics')" role="switch" aria-checked="false"><span class="toggle-knob"></span></div>
+        <div class="toggle" id="togAnalytics" onclick="toggleCookie(this)"><div class="toggle-knob"></div></div>
       </div>
-      <div class="modal-actions">
-        <button class="btn-secondary" onclick="rejectCookies();closeModal('cookies')">Tout refuser</button>
-        <button class="btn-primary" onclick="saveCookiePrefs()">Sauvegarder</button>
+
+      <div class="cpref-item">
+        <div class="cpref-info">
+          <strong>Cookies de préférences</strong>
+          <p>Mémorisent vos choix (langue, paramètres d'affichage).</p>
+        </div>
+        <div class="toggle" id="togPrefs" onclick="toggleCookie(this)"><div class="toggle-knob"></div></div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-ghost btn-sm" onclick="saveCookiePrefs()">Enregistrer mes choix</button>
+        <button class="btn btn-primary btn-sm" onclick="acceptAllCookies()">Tout accepter</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- CGV -->
-<div id="modal-cgv" class="modal-overlay" onclick="closeModalOutside(event,'cgv')">
-  <div class="modal-box" role="dialog" aria-modal="true">
-    <div class="modal-head">
-      <h2>Conditions Générales de Vente</h2>
-      <button class="modal-close-btn" onclick="closeModal('cgv')">✕</button>
+
+<!-- ══════════════════════════════════════
+     BANNIÈRE COOKIES
+══════════════════════════════════════ -->
+<div class="cookie-banner" id="cookieBanner">
+  <div class="cookie-inner">
+    <div class="cookie-text">
+      <div class="cookie-title">🍪 Nous utilisons des cookies</div>
+      <p>Nous utilisons des cookies pour améliorer votre expérience. En continuant, vous acceptez notre
+        <a onclick="openModal('modalRgpd')">politique de confidentialité</a>.</p>
     </div>
-    <div class="modal-scroll">
-      <p class="modal-updated">Dernière mise à jour : Mai 2025</p>
-      <h3>1. Objet</h3>
-      <p>Les présentes Conditions Générales de Vente (CGV) régissent les conditions d'accès et d'utilisation des abonnements Archiva proposés par A.E.L. Corporation.</p>
-      <h3>2. Offres et tarifs</h3>
-      <p>Archiva propose quatre niveaux : Gratuit (0€/mois), Pro (57€ HT/mois), Entreprise (147€ HT/mois), Sur devis. Les prix sont indiqués hors taxes. La TVA applicable est celle en vigueur en France au moment de la facturation (20% pour les professionnels, potentiellement réduite selon votre statut).</p>
-      <h3>3. Paiement</h3>
-      <p>Le paiement s'effectue par prélèvement mensuel automatique sécurisé. En cas de défaut de paiement, le service peut être suspendu après un délai de 10 jours ouvrés avec notification préalable par email.</p>
-      <h3>4. Résiliation</h3>
-      <p>L'abonnement peut être résilié à tout moment sans frais, avec un préavis d'un mois calendaire. Aucun remboursement partiel n'est effectué pour le mois en cours déjà facturé.</p>
-      <h3>5. Droit de rétractation</h3>
-      <p>Conformément à l'article L221-28 du Code de la consommation, le droit de rétractation de 14 jours ne s'applique pas aux services numériques commencés avec l'accord du client avant l'expiration du délai de rétractation.</p>
-      <h3>6. Responsabilité et limite</h3>
-      <p>A.E.L. Corporation s'engage à fournir le service avec diligence raisonnable. Les analyses et documents générés par l'IA sont fournis à titre informatif. A.E.L. Corporation ne saurait être tenu responsable des décisions prises sur leur base. La responsabilité maximale d'A.E.L. Corporation est limitée aux montants effectivement payés au cours des 3 derniers mois.</p>
-      <h3>7. Données personnelles</h3>
-      <p>Le traitement des données est régi par notre <a href="#" onclick="closeModal('cgv');showModal('privacy');return false;">politique de confidentialité</a>, conforme au RGPD.</p>
-      <h3>8. Droit applicable</h3>
-      <p>Les présentes CGV sont soumises au droit français. Tout litige relevant de leur interprétation ou exécution sera de la compétence exclusive des tribunaux français.</p>
-      <h3>9. Médiation de la consommation</h3>
-      <p>En cas de litige non résolu amiablement, vous pouvez recourir gratuitement à la médiation. Contactez-nous d'abord : <a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a>.</p>
+    <div class="cookie-acts">
+      <button class="btn-ck-ok"   onclick="acceptCookies()">Tout accepter</button>
+      <button class="btn-ck-no"   onclick="rejectCookies()">Refuser</button>
+      <button class="btn-ck-pref" onclick="openModal('modalCookies')">Personnaliser</button>
     </div>
   </div>
 </div>
