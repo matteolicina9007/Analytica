@@ -37,7 +37,7 @@
       <span class="nav-link active" data-page="home"    onclick="showPage('home')">Accueil</span>
       <span class="nav-link"        data-page="ai"      onclick="showPage('ai')">Espace IA</span>
       <span class="nav-link"        data-page="pricing" onclick="showPage('pricing')">Tarifs</span>
-      <span class="nav-link"        data-page="reseller" onclick="showPage('reseller')">Revendeurs</span>
+      <span class="nav-link"        data-page="partners" onclick="showPage('partners')">Partenaires</span>
       <span class="nav-link"        data-page="contact" onclick="showPage('contact')">Contact</span>
     </div>
     <div class="nav-right">
@@ -52,7 +52,7 @@
     <span class="mobile-link" onclick="showPage('home');toggleMobile()">Accueil</span>
     <span class="mobile-link" onclick="showPage('ai');toggleMobile()">Espace IA</span>
     <span class="mobile-link" onclick="showPage('pricing');toggleMobile()">Tarifs</span>
-    <span class="mobile-link" onclick="showPage('reseller');toggleMobile()">Revendeurs</span>
+    <span class="mobile-link" onclick="showPage('partners');toggleMobile()">Partenaires</span>
     <span class="mobile-link" onclick="showPage('contact');toggleMobile()">Contact</span>
     <button class="btn btn-primary btn-full mobile-cta" onclick="showPage('pricing');toggleMobile()">Essai gratuit</button>
   </div>
@@ -142,7 +142,7 @@
         <div class="feat-card" onclick="showPage('ai')"><div class="feat-icon">📊</div><h3>Analyse &amp; Rapports visuels</h3><p>Graphiques interactifs Chart.js. Chaque rapport est mémorisé et peut servir de base pour d'autres analyses.</p><div class="feat-arrow">Explorer <span>→</span></div></div>
         <div class="feat-card" onclick="showPage('ai')"><div class="feat-icon">📧</div><h3>Connexion Email</h3><p>Gmail &amp; Outlook via API. Les résumés d'emails rejoignent votre bibliothèque de documents.</p><div class="feat-arrow">Explorer <span>→</span></div></div>
         <div class="feat-card" onclick="showPage('ai')"><div class="feat-icon">☁️</div><h3>Stockage Cloud</h3><p>Dropbox, Google Drive, OneDrive. Analysez vos fichiers cloud directement, sauvegardez les résultats.</p><div class="feat-arrow">Explorer <span>→</span></div></div>
-        <div class="feat-card" onclick="showPage('reseller')"><div class="feat-icon">🏷️</div><h3>Marque Blanche</h3><p>Revendez Archiva sous votre propre marque. Personnalisez couleurs, logo, contact et téléchargez votre site.</p><div class="feat-arrow">Devenir revendeur <span>→</span></div></div>
+        <div class="feat-card" onclick="showPage('partners')"><div class="feat-icon">🤝</div><h3>Partenaires</h3><p>Rejoignez notre réseau de partenaires de confiance et bénéficiez d'un accompagnement dédié.</p><div class="feat-arrow">Voir nos partenaires <span>→</span></div></div>
       </div>
     </div>
   </section>
@@ -156,7 +156,7 @@
       <div class="how-grid">
         <div class="how-card"><div class="how-num">1</div><h3>Connectez votre IA</h3><p>Entrez votre clé API Claude ou Mistral. Elle reste dans votre session, jamais sur nos serveurs.</p></div>
         <div class="how-card"><div class="how-num">2</div><h3>Travaillez vos documents</h3><p>Générez, analysez, extrayez. Chaque résultat est sauvegardé et retrouvable via la barre de recherche IA.</p></div>
-        <div class="how-card"><div class="how-num">3</div><h3>Exportez &amp; partagez</h3><p>PDF, copie ou téléchargement ZIP de votre site personnalisé pour les revendeurs.</p></div>
+        <div class="how-card"><div class="how-num">3</div><h3>Exportez &amp; partagez</h3><p>Téléchargez vos résultats en PDF, copiez ou partagez directement depuis l'interface.</p></div>
       </div>
     </div>
   </section>
@@ -214,7 +214,7 @@
           <p class="footer-company">A.E.L. Corporation</p>
         </div>
         <div class="footer-links">
-          <div class="footer-col"><h4>Produit</h4><a onclick="showPage('ai')">Espace IA</a><a onclick="showPage('pricing')">Tarifs</a><a onclick="showPage('reseller')">Revendeurs</a></div>
+          <div class="footer-col"><h4>Produit</h4><a onclick="showPage('ai')">Espace IA</a><a onclick="showPage('pricing')">Tarifs</a><a onclick="showPage('partners')">Partenaires</a></div>
           <div class="footer-col"><h4>Entreprise</h4><a onclick="showPage('contact')">Contact</a><a onclick="openModal('modalMentions')">Mentions légales</a><a onclick="openModal('modalRgpd')">Politique RGPD</a><a onclick="openModal('modalCgu')">CGU</a></div>
           <div class="footer-col"><h4>Contact</h4><a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a><a href="tel:+33621642329">06 21 64 23 29</a><a onclick="openModal('modalCookies')">Préférences cookies</a></div>
         </div>
@@ -553,141 +553,64 @@
 
 
 <!-- ══════════════════════════════════════
-     PAGE : REVENDEURS
+     PAGE : PARTENAIRES
 ══════════════════════════════════════ -->
-<div class="page" id="page-reseller">
-  <div class="reseller-page">
-    <div class="reseller-intro">
-      <div class="sec-label" style="margin:0 auto 1.25rem"><span class="dot"></span>Marque Blanche</div>
-      <h1>Créez votre site <span class="gradient-text">en marque blanche</span></h1>
-      <p>Espace réservé aux revendeurs autorisés. Entrez votre mot de passe pour accéder au configurateur.</p>
+<div class="page" id="page-partners">
+  <div class="partners-page">
+    <div class="sec-head" style="padding-top:1rem">
+      <div class="sec-label" style="margin:0 auto 1.25rem"><span class="dot"></span>Nos Partenaires</div>
+      <h1>Ils font confiance à <span class="gradient-text">Archiva</span></h1>
+      <p>Découvrez les entreprises et organisations partenaires qui utilisent Archiva au quotidien.</p>
     </div>
 
-    <!-- ÉCRAN MOT DE PASSE -->
-    <div id="resellerGate" style="max-width:440px;margin:0 auto 3rem">
-      <div class="panel-box" style="text-align:center">
-        <div style="font-size:3rem;margin-bottom:1rem">🔐</div>
-        <h3 style="margin-bottom:.5rem">Accès revendeur</h3>
-        <p style="font-size:.875rem;margin-bottom:1.75rem">Saisissez le mot de passe fourni par A.E.L. Corporation pour accéder au configurateur.</p>
-        <div style="display:flex;gap:.6rem">
-          <input type="password" class="form-input" id="resellerPasswordInput"
-            placeholder="Mot de passe revendeur…"
-            onkeydown="if(event.key==='Enter')checkResellerPassword()">
-          <button class="btn btn-primary" onclick="checkResellerPassword()">Accéder</button>
-        </div>
-        <div id="resellerPasswordError" style="display:none;margin-top:.75rem;font-size:.82rem;color:var(--red)">
-          ✗ Mot de passe incorrect. Contactez a.e.l.corporation@hotmail.com
-        </div>
-        <p style="font-size:.77rem;color:var(--t500);margin-top:1.25rem">
-          Pas encore revendeur ? <a onclick="showPage('contact')" style="color:var(--orange2);cursor:pointer">Contactez-nous →</a>
-        </p>
-      </div>
+    <!-- GRILLE DES PARTENAIRES -->
+    <div class="partners-grid" id="partnersGrid">
+      <!-- cartes injectées par JS -->
     </div>
 
-    <!-- CONFIGURATEUR (masqué jusqu'au bon mot de passe) -->
-    <div id="resellerContent" style="display:none">
-    <div class="reseller-grid">
-      <!-- PANNEAU DE CONFIGURATION -->
-      <div class="config-panel">
-        <h2>⚙️ Configurateur</h2>
+    <!-- MESSAGE SI VIDE -->
+    <div id="partnersEmpty" style="display:none;text-align:center;padding:4rem 1rem;color:var(--t500)">
+      <div style="font-size:3.5rem;margin-bottom:1rem">🤝</div>
+      <p>Aucun partenaire pour l'instant. Revenez bientôt !</p>
+    </div>
 
-        <div class="config-steps">
-          <div class="cstep active" id="cstep-1" onclick="goConfigStep(1)">1. Marque</div>
-          <div class="cstep"        id="cstep-2" onclick="goConfigStep(2)">2. Couleurs</div>
-          <div class="cstep"        id="cstep-3" onclick="goConfigStep(3)">3. Contenu</div>
-        </div>
+    <!-- BOUTON AJOUTER (admin) -->
+    <div style="display:flex;justify-content:center;margin-top:3rem">
+      <button class="btn btn-ghost" onclick="openPartnerAuth()">➕ Ajouter un partenaire</button>
+    </div>
+  </div>
 
-        <!-- ÉTAPE 1 : MARQUE -->
-        <div class="config-step-content active" id="csc-1">
-          <div class="form-field"><label>Nom de la marque *</label><input type="text" class="form-input" id="rBrandName" placeholder="Ex : DocPro, SmartDocs…" oninput="updatePreview()"></div>
-          <div class="form-field"><label>Slogan</label><input type="text" class="form-input" id="rTagline" placeholder="Ex : L'IA au service de vos documents" oninput="updatePreview()"></div>
-          <div class="form-field"><label>Nom de l'entreprise</label><input type="text" class="form-input" id="rCompany" placeholder="Ex : DocPro SAS" oninput="updatePreview()"></div>
-          <div class="step-nav">
-            <button class="btn btn-primary" onclick="goConfigStep(2)">Suivant : Couleurs →</button>
-          </div>
-        </div>
-
-        <!-- ÉTAPE 2 : COULEURS -->
-        <div class="config-step-content" id="csc-2">
-          <div class="color-row">
-            <div class="color-field form-field">
-              <label>Couleur principale</label>
-              <div class="color-picker-wrap">
-                <input type="color" id="rPrimaryColor" value="#f97316" oninput="syncColor('rPrimaryColor','rPrimaryHex');updatePreview()">
-                <input type="text" class="color-hex" id="rPrimaryHex" value="#f97316" maxlength="7" oninput="syncHex('rPrimaryHex','rPrimaryColor');updatePreview()">
-              </div>
-            </div>
-            <div class="color-field form-field">
-              <label>Couleur secondaire</label>
-              <div class="color-picker-wrap">
-                <input type="color" id="rSecondaryColor" value="#6366f1" oninput="syncColor('rSecondaryColor','rSecondaryHex');updatePreview()">
-                <input type="text" class="color-hex" id="rSecondaryHex" value="#6366f1" maxlength="7" oninput="syncHex('rSecondaryHex','rSecondaryColor');updatePreview()">
-              </div>
-            </div>
-          </div>
-          <div class="form-field"><label>Emoji / Icône logo</label><input type="text" class="form-input" id="rLogoEmoji" placeholder="📄 ou 🤖 ou 💼…" maxlength="2" oninput="updatePreview()"></div>
-          <div class="step-nav" style="justify-content:space-between">
-            <button class="btn btn-ghost" onclick="goConfigStep(1)">← Retour</button>
-            <button class="btn btn-primary" onclick="goConfigStep(3)">Suivant : Contenu →</button>
-          </div>
-        </div>
-
-        <!-- ÉTAPE 3 : CONTENU -->
-        <div class="config-step-content" id="csc-3">
-          <div class="form-field"><label>Email de contact *</label><input type="email" class="form-input" id="rEmail" placeholder="contact@votresite.fr" oninput="updatePreview()"></div>
-          <div class="form-field"><label>Téléphone</label><input type="text" class="form-input" id="rPhone" placeholder="06 00 00 00 00" oninput="updatePreview()"></div>
-          <div class="form-field"><label>Titre hero (accroche principale)</label><input type="text" class="form-input" id="rHeroTitle" placeholder="L'intelligence documentaire pour votre entreprise" oninput="updatePreview()"></div>
-          <div class="form-field"><label>Description hero</label><textarea class="form-textarea" id="rHeroDesc" rows="3" placeholder="Décrivez votre service en 1-2 phrases…" oninput="updatePreview()"></textarea></div>
-          <div class="step-nav" style="justify-content:space-between">
-            <button class="btn btn-ghost" onclick="goConfigStep(2)">← Retour</button>
-            <button class="btn btn-primary" onclick="goConfigStep(1)">✓ Terminé</button>
-          </div>
-        </div>
+  <!-- MODAL : AUTHENTIFICATION ADMIN -->
+  <div id="partnerAuthModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePartnerAuth()">
+    <div class="modal-box" style="max-width:420px;text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:1rem">🔐</div>
+      <h3 style="margin-bottom:.4rem">Accès administrateur</h3>
+      <p style="font-size:.875rem;color:var(--t400);margin-bottom:1.5rem">Entrez le mot de passe pour gérer les partenaires.</p>
+      <div style="display:flex;gap:.6rem;margin-bottom:.75rem">
+        <input type="password" class="form-input" id="partnerAuthInput"
+          placeholder="Mot de passe…"
+          onkeydown="if(event.key==='Enter')checkPartnerAuth()">
+        <button class="btn btn-primary" onclick="checkPartnerAuth()">Accéder</button>
       </div>
+      <div id="partnerAuthError" style="display:none;font-size:.82rem;color:var(--red)">✗ Mot de passe incorrect.</div>
+      <button class="btn btn-ghost btn-sm" style="margin-top:1rem" onclick="closePartnerAuth()">Annuler</button>
+    </div>
+  </div>
 
-      <!-- PANNEAU DE PRÉVISUALISATION -->
-      <div class="preview-panel">
-        <div class="preview-header">
-          <span>👁️ Prévisualisation en direct</span>
-          <span id="prevBrandLabel" style="font-size:.82rem;font-weight:800;color:var(--white)">Archiva</span>
-        </div>
-        <div class="preview-live" id="previewLive">
-          <div class="prev-navbar" id="prevNavbar" style="background:rgba(255,255,255,.04)">
-            <div class="prev-logo">
-              <div class="prev-logo-ico" id="prevLogoBg" style="background:#f97316">📄</div>
-              <span id="prevBrandName">Archiva</span>
-            </div>
-            <div class="prev-links">
-              <span class="prev-link">Accueil</span>
-              <span class="prev-link">Espace IA</span>
-              <span class="prev-link">Tarifs</span>
-            </div>
-            <div class="prev-cta" id="prevCta" style="background:#f97316">Essai gratuit</div>
-          </div>
-          <div class="prev-hero">
-            <h3 id="prevHeroTitle">L'intelligence documentaire pour votre entreprise</h3>
-            <p id="prevHeroDesc">Générez, analysez et gérez tous vos documents professionnels en quelques secondes.</p>
-            <div class="prev-btn" id="prevBtn" style="background:#f97316">Démarrer gratuitement</div>
-          </div>
-          <div class="prev-stats">
-            <div class="prev-stat"><div class="n" id="prevPrimary" style="color:#f97316">50K+</div><div class="l">Documents</div></div>
-            <div class="prev-stat"><div class="n" style="color:#22c55e">98%</div><div class="l">Précision</div></div>
-            <div class="prev-stat"><div class="n" id="prevSecondary" style="color:#6366f1">1200+</div><div class="l">Clients</div></div>
-          </div>
-        </div>
-        <div class="download-wrap">
-          <button class="btn btn-primary btn-full btn-lg" onclick="generateResellerZip()">
-            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            Télécharger mon site ZIP
-          </button>
-          <p style="font-size:.75rem;color:var(--t500);text-align:center;margin-top:.6rem">Site complet prêt à ouvrir · 3 fichiers · Aucun serveur requis</p>
-        </div>
+  <!-- MODAL : AJOUTER UN PARTENAIRE -->
+  <div id="partnerAddModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closePartnerAdd()">
+    <div class="modal-box" style="max-width:500px">
+      <h3 style="margin-bottom:1.5rem">➕ Nouveau partenaire</h3>
+      <div class="form-field"><label>Emoji</label><input type="text" class="form-input" id="partnerEmoji" placeholder="🏢" maxlength="2"></div>
+      <div class="form-field"><label>Titre *</label><input type="text" class="form-input" id="partnerTitle" placeholder="Nom du partenaire"></div>
+      <div class="form-field"><label>Description *</label><textarea class="form-textarea" id="partnerDesc" rows="3" placeholder="Décrivez ce partenaire en quelques mots…"></textarea></div>
+      <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem">
+        <button class="btn btn-ghost" onclick="closePartnerAdd()">Annuler</button>
+        <button class="btn btn-primary" onclick="savePartner()">Enregistrer</button>
       </div>
     </div>
   </div>
-    </div><!-- /resellerContent -->
-  </div>
-</div><!-- /page-reseller -->
+</div><!-- /page-partners -->
 
 
 <!-- ══════════════════════════════════════
@@ -706,7 +629,6 @@
         <div class="ci-item"><div class="ci-ico"><svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div><div><div class="ci-label">Email</div><div class="ci-val"><a href="mailto:a.e.l.corporation@hotmail.com">a.e.l.corporation@hotmail.com</a></div></div></div>
         <div class="ci-item"><div class="ci-ico"><svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12 19.79 19.79 0 0 1 1.93 3.4 2 2 0 0 1 3.9 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg></div><div><div class="ci-label">Téléphone</div><div class="ci-val"><a href="tel:+33621642329">06 21 64 23 29</a></div></div></div>
         <div class="ci-item"><div class="ci-ico"><svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></div><div><div class="ci-label">Entreprise</div><div class="ci-val">A.E.L. Corporation</div></div></div>
-        <div class="ci-item"><div class="ci-ico"><svg width="18" height="18" fill="none" stroke="var(--orange)" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div><div><div class="ci-label">Disponibilité</div><div class="ci-val">Lun–Ven, 9h–18h<br>Réponse sous 24h</div></div></div>
         <div class="contact-guarantee"><div class="cg-badge">✓ Garanti sans engagement</div><p>Démonstration gratuite disponible sur demande.</p></div>
         <div class="contact-rgpd"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Données traitées conformément au RGPD. <a onclick="openModal('modalRgpd')">Politique →</a></div>
       </div>

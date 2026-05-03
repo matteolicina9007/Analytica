@@ -76,8 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   renderLibrary();
-  updatePreview();
-  restoreResellerAccess();
+  renderPartners();
 });
 
 // ── NAVIGATION ─────────────────────────────────────────────
@@ -766,157 +765,108 @@ async function exportFullReport() {
   finally { document.body.removeChild(wrapper); }
 }
 
-// ── REVENDEUR — MOT DE PASSE ───────────────────────────────
-const RESELLER_PASSWORD = 'Archiva2025!'; // ← changez ce mot de passe ici
+// ── PARTENAIRES ────────────────────────────────────────────
+const PARTNER_PASSWORD = 'Archiva2025!'; // ← changez ce mot de passe ici
 
-function checkResellerPassword() {
-  const input = document.getElementById('resellerPasswordInput').value;
-  const error = document.getElementById('resellerPasswordError');
-  if (input === RESELLER_PASSWORD) {
-    document.getElementById('resellerGate').style.display    = 'none';
-    document.getElementById('resellerContent').style.display = 'block';
-    sessionStorage.setItem('archiva_reseller', '1');
+function loadPartners() {
+  try { return JSON.parse(localStorage.getItem('archiva_partners') || '[]'); }
+  catch { return []; }
+}
+function savePartners(list) {
+  localStorage.setItem('archiva_partners', JSON.stringify(list));
+}
+
+function renderPartners() {
+  const grid  = document.getElementById('partnersGrid');
+  const empty = document.getElementById('partnersEmpty');
+  if (!grid) return;
+  const list = loadPartners();
+  if (!list.length) {
+    grid.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+  grid.innerHTML = list.map((p, i) => `
+    <div class="partner-card">
+      <div class="partner-card-emoji">${p.emoji || '🤝'}</div>
+      <h3 class="partner-card-title">${escHtml(p.title)}</h3>
+      <p class="partner-card-desc">${escHtml(p.desc)}</p>
+      <button class="btn btn-ghost btn-sm partner-delete-btn" onclick="confirmDeletePartner(${i})">Supprimer</button>
+    </div>
+  `).join('');
+}
+
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openPartnerAuth() {
+  const modal = document.getElementById('partnerAuthModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('partnerAuthInput').value = '';
+    document.getElementById('partnerAuthError').style.display = 'none';
+    setTimeout(() => document.getElementById('partnerAuthInput').focus(), 50);
+  }
+}
+function closePartnerAuth() {
+  const modal = document.getElementById('partnerAuthModal');
+  if (modal) modal.style.display = 'none';
+}
+
+function checkPartnerAuth() {
+  const val = document.getElementById('partnerAuthInput').value;
+  if (val === PARTNER_PASSWORD) {
+    closePartnerAuth();
+    openPartnerAdd();
   } else {
-    error.style.display = 'block';
-    document.getElementById('resellerPasswordInput').value = '';
-    document.getElementById('resellerPasswordInput').focus();
+    document.getElementById('partnerAuthError').style.display = 'block';
+    document.getElementById('partnerAuthInput').value = '';
+    document.getElementById('partnerAuthInput').focus();
   }
 }
 
-// Restaure l'accès si déjà authentifié dans cette session
-function restoreResellerAccess() {
-  if (sessionStorage.getItem('archiva_reseller') === '1') {
-    const gate    = document.getElementById('resellerGate');
-    const content = document.getElementById('resellerContent');
-    if (gate)    gate.style.display    = 'none';
-    if (content) content.style.display = 'block';
+function openPartnerAdd() {
+  const modal = document.getElementById('partnerAddModal');
+  if (modal) {
+    modal.style.display = 'flex';
+    document.getElementById('partnerEmoji').value = '';
+    document.getElementById('partnerTitle').value = '';
+    document.getElementById('partnerDesc').value  = '';
+    setTimeout(() => document.getElementById('partnerTitle').focus(), 50);
   }
 }
-
-// ── REVENDEUR — CONFIGURATEUR ──────────────────────────────
-function goConfigStep(n) {
-  [1, 2, 3].forEach(i => {
-    const step    = document.getElementById('cstep-' + i);
-    const content = document.getElementById('csc-' + i);
-    const isActive = i === n;
-    const isDone   = i < n;
-    step.className    = 'cstep' + (isActive ? ' active' : '') + (isDone ? ' done' : '');
-    content.className = 'config-step-content' + (isActive ? ' active' : '');
-  });
-  updatePreview();
+function closePartnerAdd() {
+  const modal = document.getElementById('partnerAddModal');
+  if (modal) modal.style.display = 'none';
 }
 
-function syncColor(pickerEl, hexEl) {
-  document.getElementById(hexEl).value = document.getElementById(pickerEl).value;
-}
-function syncHex(hexEl, pickerEl) {
-  const v = document.getElementById(hexEl).value;
-  if (/^#[0-9a-fA-F]{6}$/.test(v)) document.getElementById(pickerEl).value = v;
-}
-
-function getResellerConfig() {
-  return {
-    brandName:   document.getElementById('rBrandName')?.value.trim()   || 'MonSaaS',
-    tagline:     document.getElementById('rTagline')?.value.trim()     || 'L\'IA au service de vos documents',
-    company:     document.getElementById('rCompany')?.value.trim()     || 'MonSaaS SAS',
-    email:       document.getElementById('rEmail')?.value.trim()       || 'contact@monsaas.fr',
-    phone:       document.getElementById('rPhone')?.value.trim()       || '06 00 00 00 00',
-    heroTitle:   document.getElementById('rHeroTitle')?.value.trim()   || 'L\'intelligence documentaire pour votre entreprise',
-    heroDesc:    document.getElementById('rHeroDesc')?.value.trim()    || 'Générez, analysez et gérez tous vos documents professionnels.',
-    primaryColor:   document.getElementById('rPrimaryColor')?.value   || '#f97316',
-    secondaryColor: document.getElementById('rSecondaryColor')?.value || '#6366f1',
-    logoEmoji:   document.getElementById('rLogoEmoji')?.value.trim()   || '📄',
-  };
+function savePartner() {
+  const emoji = document.getElementById('partnerEmoji').value.trim() || '🤝';
+  const title = document.getElementById('partnerTitle').value.trim();
+  const desc  = document.getElementById('partnerDesc').value.trim();
+  if (!title) { showNotif('Le titre est obligatoire.'); return; }
+  if (!desc)  { showNotif('La description est obligatoire.'); return; }
+  const list = loadPartners();
+  list.push({ emoji, title, desc });
+  savePartners(list);
+  renderPartners();
+  closePartnerAdd();
+  showNotif('✓ Partenaire ajouté.');
 }
 
-function updatePreview() {
-  const c = getResellerConfig();
-  const el = id => document.getElementById(id);
-
-  el('prevBrandName')?.textContent   !== undefined && (el('prevBrandName').textContent  = c.brandName);
-  el('prevBrandLabel')?.textContent  !== undefined && (el('prevBrandLabel').textContent = c.brandName);
-  el('prevHeroTitle')?.textContent   !== undefined && (el('prevHeroTitle').textContent  = c.heroTitle || 'L\'intelligence documentaire pour votre entreprise');
-  el('prevHeroDesc')?.textContent    !== undefined && (el('prevHeroDesc').textContent   = c.heroDesc  || 'Générez, analysez et gérez tous vos documents.');
-
-  if (el('prevLogoBg')) {
-    el('prevLogoBg').style.background = c.primaryColor;
-    el('prevLogoBg').textContent      = c.logoEmoji || '📄';
+function confirmDeletePartner(index) {
+  const pw = prompt('Entrez le mot de passe administrateur pour supprimer ce partenaire :');
+  if (pw === PARTNER_PASSWORD) {
+    const list = loadPartners();
+    list.splice(index, 1);
+    savePartners(list);
+    renderPartners();
+    showNotif('Partenaire supprimé.');
+  } else if (pw !== null) {
+    showNotif('Mot de passe incorrect.');
   }
-  if (el('prevCta'))     el('prevCta').style.background     = c.primaryColor;
-  if (el('prevBtn'))     el('prevBtn').style.background     = c.primaryColor;
-  if (el('prevPrimary')) el('prevPrimary').style.color      = c.primaryColor;
-  if (el('prevSecondary')) el('prevSecondary').style.color  = c.secondaryColor;
-}
-
-async function generateResellerZip() {
-  const c = getResellerConfig();
-  if (!c.brandName) { showNotif('Veuillez entrer un nom de marque.'); return; }
-
-  showNotif('⏳ Génération du ZIP en cours…');
-
-  try {
-    const [htmlText, cssText, jsText] = await Promise.all([
-      fetch('index.html').then(r => r.text()),
-      fetch('styles.css').then(r => r.text()),
-      fetch('app.js').then(r => r.text()),
-    ]);
-
-    // Customise CSS : remplace les variables de couleur
-    const customCss = cssText
-      .replace(/--orange:\s*#f97316/g,    `--orange: ${c.primaryColor}`)
-      .replace(/--orange2:\s*#fb923c/g,   `--orange2: ${lightenHex(c.primaryColor, 20)}`)
-      .replace(/--orange-d:\s*#ea580c/g,  `--orange-d: ${darkenHex(c.primaryColor, 10)}`)
-      .replace(/--indigo:\s*#6366f1/g,    `--indigo: ${c.secondaryColor}`)
-      .replace(/--indigo2:\s*#818cf8/g,   `--indigo2: ${lightenHex(c.secondaryColor, 15)}`);
-
-    // Customise HTML : remplace marque, contact, textes
-    const customHtml = htmlText
-      .replace(/Archiva/g, c.brandName)
-      .replace(/A\.E\.L\. Corporation/g, c.company)
-      .replace(/a\.e\.l\.corporation@hotmail\.com/g, c.email)
-      .replace(/06 21 64 23 29/g, c.phone)
-      .replace(
-        /L'intelligence<br>\s*<span class="gradient-text">documentaire<\/span><br>\s*pour votre entreprise/,
-        c.heroTitle
-      )
-      .replace(
-        /Générez, analysez et gérez tous vos documents professionnels en quelques secondes\.[^<]*/,
-        c.heroDesc
-      );
-
-    const zip = new JSZip();
-    zip.file('index.html', customHtml);
-    zip.file('styles.css', customCss);
-    zip.file('app.js',     jsText);
-
-    const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE' });
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href     = url;
-    a.download = c.brandName.toLowerCase().replace(/\s+/g, '-') + '-site.zip';
-    a.click();
-    URL.revokeObjectURL(url);
-    showNotif('✓ Site ZIP téléchargé avec succès !');
-  } catch (err) {
-    showNotif('Erreur lors de la génération : ' + err.message);
-  }
-}
-
-// Helpers couleur simples
-function hexToRgb(hex) {
-  const r = parseInt(hex.slice(1,3),16), g = parseInt(hex.slice(3,5),16), b = parseInt(hex.slice(5,7),16);
-  return [r, g, b];
-}
-function rgbToHex(r, g, b) {
-  return '#' + [r,g,b].map(v => Math.min(255,Math.max(0,Math.round(v))).toString(16).padStart(2,'0')).join('');
-}
-function lightenHex(hex, pct) {
-  const [r,g,b] = hexToRgb(hex); const f = pct / 100;
-  return rgbToHex(r + (255-r)*f, g + (255-g)*f, b + (255-b)*f);
-}
-function darkenHex(hex, pct) {
-  const [r,g,b] = hexToRgb(hex); const f = pct / 100;
-  return rgbToHex(r*(1-f), g*(1-f), b*(1-f));
 }
 
 // ── CONTACT ────────────────────────────────────────────────

@@ -1154,11 +1154,28 @@ details.api-help summary::-webkit-details-marker{display:none}
 .prev-stat .l{font-size:.6rem;color:var(--t500)}
 .download-wrap{padding:1.25rem;border-top:1px solid var(--border)}
 
-@media(max-width:1024px){
-  .reseller-grid{grid-template-columns:1fr}
-  .preview-panel{position:static}
+/* ── PARTENAIRES ── */
+.partners-page{max-width:1200px;margin:0 auto;padding:2rem 1.5rem 4rem}
+.partners-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(280px,1fr));
+  gap:1.5rem;
+  margin-top:2.5rem;
 }
-@media(max-width:768px){
-  .config-steps{flex-wrap:wrap}
-  .color-row{grid-template-columns:1fr}
+.partner-card{
+  background:var(--glass);
+  border:1px solid var(--border);
+  border-radius:var(--r-xl);
+  padding:2rem 1.5rem 1.5rem;
+  display:flex;flex-direction:column;gap:.75rem;
+  transition:border-color .2s,transform .2s;
+}
+.partner-card:hover{border-color:var(--orange);transform:translateY(-3px)}
+.partner-card-emoji{font-size:2.5rem;line-height:1}
+.partner-card-title{font-size:1.1rem;font-weight:700;color:var(--white);margin:0}
+.partner-card-desc{font-size:.875rem;color:var(--t400);margin:0;flex:1;line-height:1.6}
+.partner-delete-btn{margin-top:.5rem;align-self:flex-start;font-size:.75rem;opacity:.5}
+.partner-delete-btn:hover{opacity:1;color:var(--red)}
+@media(max-width:640px){
+  .partners-grid{grid-template-columns:1fr}
 }
