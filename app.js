@@ -792,6 +792,7 @@ function renderPartners() {
       <div class="partner-card-emoji">${p.emoji || '🤝'}</div>
       <h3 class="partner-card-title">${escHtml(p.title)}</h3>
       <p class="partner-card-desc">${escHtml(p.desc)}</p>
+      ${p.code ? `<div class="partner-code-badge">🔑 ${escHtml(p.code)}</div>` : ''}
       <button class="btn btn-ghost btn-sm partner-delete-btn" onclick="confirmDeletePartner(${i})">Supprimer</button>
     </div>
   `).join('');
@@ -834,6 +835,7 @@ function openPartnerAdd() {
     document.getElementById('partnerEmoji').value = '';
     document.getElementById('partnerTitle').value = '';
     document.getElementById('partnerDesc').value  = '';
+    document.getElementById('partnerCode').value  = '';
     setTimeout(() => document.getElementById('partnerTitle').focus(), 50);
   }
 }
@@ -846,10 +848,13 @@ function savePartner() {
   const emoji = document.getElementById('partnerEmoji').value.trim() || '🤝';
   const title = document.getElementById('partnerTitle').value.trim();
   const desc  = document.getElementById('partnerDesc').value.trim();
+  const code  = document.getElementById('partnerCode').value.trim().toUpperCase();
   if (!title) { showNotif('Le titre est obligatoire.'); return; }
   if (!desc)  { showNotif('La description est obligatoire.'); return; }
+  if (!code)  { showNotif('Le code partenaire est obligatoire.'); return; }
   const list = loadPartners();
-  list.push({ emoji, title, desc });
+  if (list.some(p => p.code === code)) { showNotif('Ce code est déjà utilisé par un autre partenaire.'); return; }
+  list.push({ emoji, title, desc, code });
   savePartners(list);
   renderPartners();
   closePartnerAdd();
@@ -869,14 +874,61 @@ function confirmDeletePartner(index) {
   }
 }
 
+// ── MODAL ACHAT (code partenaire) ──────────────────────────
+function openPurchaseModal(planName, planPrice) {
+  document.getElementById('purchasePlanName').textContent  = planName;
+  document.getElementById('purchasePlanBadge').textContent = planName;
+  document.getElementById('purchasePlanPrice').textContent = planPrice;
+  document.getElementById('purchasePartnerCode').value     = '';
+  document.getElementById('purchaseModal').style.display   = 'flex';
+  setTimeout(() => document.getElementById('purchasePartnerCode').focus(), 50);
+}
+function closePurchaseModal() {
+  document.getElementById('purchaseModal').style.display = 'none';
+}
+function confirmPurchase() {
+  const planName = document.getElementById('purchasePlanName').textContent;
+  const planPrice = document.getElementById('purchasePlanPrice').textContent;
+  const code = document.getElementById('purchasePartnerCode').value.trim().toUpperCase();
+
+  if (code) {
+    const partners = loadPartners();
+    const match = partners.find(p => p.code === code);
+    if (!match) {
+      showNotif('Code partenaire non reconnu. Laissez le champ vide pour continuer sans code.');
+      return;
+    }
+  }
+
+  sessionStorage.setItem('archiva_purchase_plan', `${planName} — ${planPrice}`);
+  if (code) sessionStorage.setItem('archiva_partner_code', code);
+  else      sessionStorage.removeItem('archiva_partner_code');
+
+  closePurchaseModal();
+  showPage('contact');
+
+  if (code) {
+    const partners = loadPartners();
+    const match = partners.find(p => p.code === code);
+    showNotif(`✓ Code ${code} reconnu — partenaire : ${match.title}`);
+  }
+
+  setTimeout(() => {
+    const subjectEl = document.getElementById('cSubject');
+    if (subjectEl) subjectEl.value = 'Demande de démonstration';
+  }, 300);
+}
+
 // ── CONTACT ────────────────────────────────────────────────
 function submitContact() {
-  const fn = document.getElementById('cFirstname').value.trim();
-  const ln = document.getElementById('cLastname').value.trim();
-  const em = document.getElementById('cEmail').value.trim();
-  const su = document.getElementById('cSubject').value;
-  const ms = document.getElementById('cMessage').value.trim();
-  const rg = document.getElementById('cRgpd').checked;
+  const fn   = document.getElementById('cFirstname').value.trim();
+  const ln   = document.getElementById('cLastname').value.trim();
+  const em   = document.getElementById('cEmail').value.trim();
+  const su   = document.getElementById('cSubject').value;
+  const ms   = document.getElementById('cMessage').value.trim();
+  const rg   = document.getElementById('cRgpd').checked;
+  const plan = sessionStorage.getItem('archiva_purchase_plan') || '';
+  const code = sessionStorage.getItem('archiva_partner_code') || '';
   if (!fn || !ln) { showNotif('Prénom et nom requis.'); return; }
   if (!em || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) { showNotif('Email invalide.'); return; }
   if (!su) { showNotif('Veuillez sélectionner un sujet.'); return; }
@@ -885,7 +937,12 @@ function submitContact() {
   document.getElementById('contactFormArea').style.display = 'none';
   document.getElementById('successEmail').textContent = em;
   document.getElementById('contactSuccess').style.display = 'flex';
-  window.location.href = `mailto:a.e.l.corporation@hotmail.com?subject=${encodeURIComponent('[Archiva] ' + su + ' — ' + fn + ' ' + ln)}&body=${encodeURIComponent(`Prénom: ${fn}\nNom: ${ln}\nEmail: ${em}\nTél: ${document.getElementById('cPhone').value}\nEntreprise: ${document.getElementById('cCompany').value}\n\n${ms}`)}`;
+  const planLine = plan ? `Plan choisi: ${plan}\n` : '';
+  const codeLine = code ? `Code partenaire: ${code}\n` : '';
+  const body = `Prénom: ${fn}\nNom: ${ln}\nEmail: ${em}\nTél: ${document.getElementById('cPhone').value}\nEntreprise: ${document.getElementById('cCompany').value}\n${planLine}${codeLine}\n${ms}`;
+  window.location.href = `mailto:a.e.l.corporation@hotmail.com?subject=${encodeURIComponent('[Archiva] ' + su + ' — ' + fn + ' ' + ln)}&body=${encodeURIComponent(body)}`;
+  sessionStorage.removeItem('archiva_purchase_plan');
+  sessionStorage.removeItem('archiva_partner_code');
 }
 function resetContact() {
   ['cFirstname','cLastname','cEmail','cPhone','cCompany','cMessage'].forEach(id => { document.getElementById(id).value = ''; });
