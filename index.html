@@ -41,8 +41,17 @@
       <span class="nav-link"        data-page="contact" onclick="showPage('contact')">Contact</span>
     </div>
     <div class="nav-right">
-      <button class="btn btn-ghost btn-sm" onclick="showPage('ai')">Se connecter</button>
-      <button class="btn nav-cta" onclick="showPage('pricing')">Essai gratuit</button>
+      <div id="navLoggedOut" style="display:flex;gap:.5rem;align-items:center">
+        <button class="btn btn-ghost btn-sm" onclick="showPage('login')">Se connecter</button>
+        <button class="btn nav-cta" onclick="showPage('signup')">S'inscrire</button>
+      </div>
+      <div id="navLoggedIn" style="display:none;align-items:center;gap:.75rem">
+        <div class="nav-user-badge">
+          <span class="nav-user-ico">👤</span>
+          <span id="navUserName"></span>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="logoutUser()">Déconnexion</button>
+      </div>
     </div>
     <button class="hamburger" id="hamburger" onclick="toggleMobile()" aria-label="Menu">
       <span></span><span></span><span></span>
@@ -54,7 +63,17 @@
     <span class="mobile-link" onclick="showPage('pricing');toggleMobile()">Tarifs</span>
     <span class="mobile-link" onclick="showPage('partners');toggleMobile()">Partenaires</span>
     <span class="mobile-link" onclick="showPage('contact');toggleMobile()">Contact</span>
-    <button class="btn btn-primary btn-full mobile-cta" onclick="showPage('pricing');toggleMobile()">Essai gratuit</button>
+    <div id="mobileLoggedOut">
+      <button class="btn btn-ghost btn-full" style="margin-bottom:.5rem" onclick="showPage('login');toggleMobile()">Se connecter</button>
+      <button class="btn btn-primary btn-full mobile-cta" onclick="showPage('signup');toggleMobile()">S'inscrire</button>
+    </div>
+    <div id="mobileLoggedIn" style="display:none">
+      <div class="nav-user-badge" style="justify-content:center;margin-bottom:.75rem">
+        <span class="nav-user-ico">👤</span>
+        <span id="mobileUserName" style="font-weight:700;color:var(--white)"></span>
+      </div>
+      <button class="btn btn-ghost btn-full" onclick="logoutUser();toggleMobile()">Déconnexion</button>
+    </div>
   </div>
 </nav>
 
@@ -433,6 +452,95 @@
 
 
 <!-- ══════════════════════════════════════
+     PAGE : CONNEXION
+══════════════════════════════════════ -->
+<div class="page" id="page-login">
+  <div class="auth-page">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="logo-ico">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+            <rect width="32" height="32" rx="9" fill="url(#lg)"/>
+            <path d="M9 9h9a5 5 0 0 1 0 10H9V9z" fill="white" opacity=".9"/>
+            <circle cx="22" cy="23" r="4" fill="white" opacity=".7"/>
+            <defs><linearGradient id="lg" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#f97316"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span class="logo-name">Archiva</span>
+      </div>
+      <h2 class="auth-title">Bon retour 👋</h2>
+      <p class="auth-sub">Connectez-vous à votre espace Archiva</p>
+
+      <div id="loginError" class="auth-error" style="display:none"></div>
+
+      <div class="form-field"><label>Adresse email</label>
+        <input type="email" class="form-input" id="loginEmail" placeholder="vous@exemple.fr"
+          onkeydown="if(event.key==='Enter')loginUser()">
+      </div>
+      <div class="form-field"><label>Mot de passe</label>
+        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')loginUser()">
+      </div>
+
+      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="loginUser()">Se connecter</button>
+
+      <p class="auth-switch">Pas encore de compte ? <a onclick="showPage('signup')">S'inscrire →</a></p>
+    </div>
+  </div>
+</div><!-- /page-login -->
+
+
+<!-- ══════════════════════════════════════
+     PAGE : INSCRIPTION
+══════════════════════════════════════ -->
+<div class="page" id="page-signup">
+  <div class="auth-page">
+    <div class="auth-box">
+      <div class="auth-logo">
+        <div class="logo-ico">
+          <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
+            <rect width="32" height="32" rx="9" fill="url(#lg2)"/>
+            <path d="M9 9h9a5 5 0 0 1 0 10H9V9z" fill="white" opacity=".9"/>
+            <circle cx="22" cy="23" r="4" fill="white" opacity=".7"/>
+            <defs><linearGradient id="lg2" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse"><stop stop-color="#f97316"/><stop offset="1" stop-color="#ea580c"/></linearGradient></defs>
+          </svg>
+        </div>
+        <span class="logo-name">Archiva</span>
+      </div>
+      <h2 class="auth-title">Créer un compte</h2>
+      <p class="auth-sub">Rejoignez Archiva gratuitement, sans carte bancaire</p>
+
+      <div id="signupError" class="auth-error" style="display:none"></div>
+      <div id="signupSuccess" class="auth-success" style="display:none">
+        ✓ Compte créé ! Vous êtes maintenant connecté.
+      </div>
+
+      <div class="form-field"><label>Prénom &amp; Nom</label>
+        <input type="text" class="form-input" id="signupName" placeholder="Jean Dupont"
+          onkeydown="if(event.key==='Enter')registerUser()">
+      </div>
+      <div class="form-field"><label>Adresse email</label>
+        <input type="email" class="form-input" id="signupEmail" placeholder="vous@exemple.fr"
+          onkeydown="if(event.key==='Enter')registerUser()">
+      </div>
+      <div class="form-field"><label>Mot de passe</label>
+        <input type="password" class="form-input" id="signupPassword" placeholder="8 caractères minimum"
+          onkeydown="if(event.key==='Enter')registerUser()">
+      </div>
+      <div class="form-field"><label>Confirmer le mot de passe</label>
+        <input type="password" class="form-input" id="signupPasswordConfirm" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')registerUser()">
+      </div>
+
+      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="registerUser()">Créer mon compte</button>
+
+      <p class="auth-switch">Déjà un compte ? <a onclick="showPage('login')">Se connecter →</a></p>
+    </div>
+  </div>
+</div><!-- /page-signup -->
+
+
+<!-- ══════════════════════════════════════
      PAGE : TARIFS
 ══════════════════════════════════════ -->
 <div class="page" id="page-pricing">
@@ -477,8 +585,8 @@
         <div class="price-per" id="priceProPer">/mois par utilisateur</div>
         <p class="price-note" id="priceProNote">Pour les professionnels et PMEs</p>
         <ul class="price-list">
-          <li>Documents illimités</li><li>Tous types de génération</li>
-          <li>Extraction PDF, DOCX, XLSX</li><li>Rapports + graphiques illimités</li>
+          <li>12 documents générés / mois</li><li>Tous types de génération</li>
+          <li>Extraction PDF, DOCX, XLSX</li><li>10 rapports + graphiques / mois</li>
           <li>Bibliothèque IA illimitée</li><li>Gmail &amp; Outlook connectés</li>
           <li>Google Drive, Dropbox, OneDrive</li><li>Export PDF illimité</li>
         </ul>
@@ -524,11 +632,11 @@
         <table class="comp-table">
           <thead><tr><th>Fonctionnalité</th><th>Gratuit</th><th class="col-pop">Pro</th><th>Entreprise</th><th class="col-custom">Sur devis</th></tr></thead>
           <tbody>
-            <tr><td>Documents / mois</td><td>5</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Documents générés / mois</td><td>5</td><td class="col-pop">12 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
             <tr><td>Bibliothèque IA partagée</td><td>10 docs</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
             <tr><td>Recherche IA cross-modules</td><td>✓</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
             <tr><td>Extraction de fichiers</td><td>TXT, CSV</td><td class="col-pop">Tous formats</td><td>Tous formats</td><td class="col-custom">Tous formats</td></tr>
-            <tr><td>Rapports avec graphiques</td><td>1/rapport</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Rapports avec graphiques</td><td>1/rapport</td><td class="col-pop">10 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
             <tr><td>Connexion email</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
             <tr><td>Stockage cloud</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
             <tr><td>Marque blanche (revendeur)</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>

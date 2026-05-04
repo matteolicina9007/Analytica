@@ -77,7 +77,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderLibrary();
   renderPartners();
+  updateNavAuth();
 });
+
+// ── AUTHENTIFICATION ────────────────────────────────────────
+function getUsers() {
+  try { return JSON.parse(localStorage.getItem('archiva_users') || '[]'); } catch { return []; }
+}
+function saveUsers(list) { localStorage.setItem('archiva_users', JSON.stringify(list)); }
+
+function getCurrentUser() {
+  try { return JSON.parse(sessionStorage.getItem('archiva_session') || 'null'); } catch { return null; }
+}
+
+function updateNavAuth() {
+  const user = getCurrentUser();
+  const lo = document.getElementById('navLoggedOut');
+  const li = document.getElementById('navLoggedIn');
+  const mlo = document.getElementById('mobileLoggedOut');
+  const mli = document.getElementById('mobileLoggedIn');
+  if (user) {
+    if (lo) lo.style.display = 'none';
+    if (li) { li.style.display = 'flex'; document.getElementById('navUserName').textContent = user.name; }
+    if (mlo) mlo.style.display = 'none';
+    if (mli) { mli.style.display = 'block'; document.getElementById('mobileUserName').textContent = user.name; }
+  } else {
+    if (lo) lo.style.display = 'flex';
+    if (li) li.style.display = 'none';
+    if (mlo) mlo.style.display = 'block';
+    if (mli) mli.style.display = 'none';
+  }
+}
+
+function registerUser() {
+  const name    = document.getElementById('signupName').value.trim();
+  const email   = document.getElementById('signupEmail').value.trim().toLowerCase();
+  const pass    = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupPasswordConfirm').value;
+  const errEl   = document.getElementById('signupError');
+  const okEl    = document.getElementById('signupSuccess');
+  errEl.style.display = 'none';
+  okEl.style.display  = 'none';
+
+  if (!name)  { errEl.textContent = 'Veuillez entrer votre nom.'; errEl.style.display = 'block'; return; }
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Email invalide.'; errEl.style.display = 'block'; return; }
+  if (pass.length < 8) { errEl.textContent = 'Le mot de passe doit contenir au moins 8 caractères.'; errEl.style.display = 'block'; return; }
+  if (pass !== confirm) { errEl.textContent = 'Les mots de passe ne correspondent pas.'; errEl.style.display = 'block'; return; }
+
+  const users = getUsers();
+  if (users.find(u => u.email === email)) { errEl.textContent = 'Un compte existe déjà avec cet email.'; errEl.style.display = 'block'; return; }
+
+  const user = { name, email, password: btoa(pass), plan: 'gratuit', createdAt: new Date().toISOString() };
+  users.push(user);
+  saveUsers(users);
+  sessionStorage.setItem('archiva_session', JSON.stringify({ name, email, plan: 'gratuit' }));
+  updateNavAuth();
+  okEl.style.display = 'block';
+  setTimeout(() => showPage('ai'), 1200);
+}
+
+function loginUser() {
+  const email  = document.getElementById('loginEmail').value.trim().toLowerCase();
+  const pass   = document.getElementById('loginPassword').value;
+  const errEl  = document.getElementById('loginError');
+  errEl.style.display = 'none';
+
+  if (!email) { errEl.textContent = 'Veuillez entrer votre email.'; errEl.style.display = 'block'; return; }
+  if (!pass)  { errEl.textContent = 'Veuillez entrer votre mot de passe.'; errEl.style.display = 'block'; return; }
+
+  const users = getUsers();
+  const user  = users.find(u => u.email === email && u.password === btoa(pass));
+  if (!user) { errEl.textContent = 'Email ou mot de passe incorrect.'; errEl.style.display = 'block'; return; }
+
+  sessionStorage.setItem('archiva_session', JSON.stringify({ name: user.name, email: user.email, plan: user.plan }));
+  updateNavAuth();
+  showNotif(`✓ Bienvenue, ${user.name} !`);
+  showPage('ai');
+}
+
+function logoutUser() {
+  sessionStorage.removeItem('archiva_session');
+  updateNavAuth();
+  showPage('home');
+  showNotif('Vous êtes déconnecté.');
+}
 
 // ── NAVIGATION ─────────────────────────────────────────────
 function showPage(name) {
