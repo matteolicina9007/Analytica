@@ -8,6 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@clerk/clerk-js@latest/dist/clerk.browser.js" type="text/javascript"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
@@ -456,7 +457,7 @@
 ══════════════════════════════════════ -->
 <div class="page" id="page-login">
   <div class="auth-page">
-    <div class="auth-box">
+    <div class="auth-box auth-box-clerk">
       <div class="auth-logo">
         <div class="logo-ico">
           <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
@@ -470,20 +471,7 @@
       </div>
       <h2 class="auth-title">Bon retour 👋</h2>
       <p class="auth-sub">Connectez-vous à votre espace Archiva</p>
-
-      <div id="loginError" class="auth-error" style="display:none"></div>
-
-      <div class="form-field"><label>Adresse email</label>
-        <input type="email" class="form-input" id="loginEmail" placeholder="vous@exemple.fr"
-          onkeydown="if(event.key==='Enter')loginUser()">
-      </div>
-      <div class="form-field"><label>Mot de passe</label>
-        <input type="password" class="form-input" id="loginPassword" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter')loginUser()">
-      </div>
-
-      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="loginUser()">Se connecter</button>
-
+      <div id="clerk-sign-in"></div>
       <p class="auth-switch">Pas encore de compte ? <a onclick="showPage('signup')">S'inscrire →</a></p>
     </div>
   </div>
@@ -495,7 +483,7 @@
 ══════════════════════════════════════ -->
 <div class="page" id="page-signup">
   <div class="auth-page">
-    <div class="auth-box">
+    <div class="auth-box auth-box-clerk">
       <div class="auth-logo">
         <div class="logo-ico">
           <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" width="24" height="24">
@@ -509,31 +497,7 @@
       </div>
       <h2 class="auth-title">Créer un compte</h2>
       <p class="auth-sub">Rejoignez Archiva gratuitement, sans carte bancaire</p>
-
-      <div id="signupError" class="auth-error" style="display:none"></div>
-      <div id="signupSuccess" class="auth-success" style="display:none">
-        ✓ Compte créé ! Vous êtes maintenant connecté.
-      </div>
-
-      <div class="form-field"><label>Prénom &amp; Nom</label>
-        <input type="text" class="form-input" id="signupName" placeholder="Jean Dupont"
-          onkeydown="if(event.key==='Enter')registerUser()">
-      </div>
-      <div class="form-field"><label>Adresse email</label>
-        <input type="email" class="form-input" id="signupEmail" placeholder="vous@exemple.fr"
-          onkeydown="if(event.key==='Enter')registerUser()">
-      </div>
-      <div class="form-field"><label>Mot de passe</label>
-        <input type="password" class="form-input" id="signupPassword" placeholder="8 caractères minimum"
-          onkeydown="if(event.key==='Enter')registerUser()">
-      </div>
-      <div class="form-field"><label>Confirmer le mot de passe</label>
-        <input type="password" class="form-input" id="signupPasswordConfirm" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter')registerUser()">
-      </div>
-
-      <button class="btn btn-primary btn-full" style="margin-top:.5rem" onclick="registerUser()">Créer mon compte</button>
-
+      <div id="clerk-sign-up"></div>
       <p class="auth-switch">Déjà un compte ? <a onclick="showPage('login')">Se connecter →</a></p>
     </div>
   </div>

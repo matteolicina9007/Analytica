@@ -77,89 +77,129 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderLibrary();
   renderPartners();
-  updateNavAuth();
+  initClerk();
 });
 
-// ── AUTHENTIFICATION ────────────────────────────────────────
-function getUsers() {
-  try { return JSON.parse(localStorage.getItem('archiva_users') || '[]'); } catch { return []; }
-}
-function saveUsers(list) { localStorage.setItem('archiva_users', JSON.stringify(list)); }
+// ── AUTHENTIFICATION — CLERK ────────────────────────────────
+const CLERK_PUB_KEY = 'pk_test_dWx0aW1hdGUtYm9uZWZpc2gtNTIuY2xlcmsuYWNjb3VudHMuZGV2JA';
+let clerk = null;
+let clerkSignInMounted = false;
+let clerkSignUpMounted = false;
 
-function getCurrentUser() {
-  try { return JSON.parse(sessionStorage.getItem('archiva_session') || 'null'); } catch { return null; }
+const clerkAppearance = {
+  variables: {
+    colorPrimary:                 '#f97316',
+    colorBackground:              '#070f1e',
+    colorInputBackground:         '#0d1f35',
+    colorInputText:               '#e2e8f0',
+    colorText:                    '#e2e8f0',
+    colorTextSecondary:           '#94a3b8',
+    colorTextOnPrimaryBackground: '#ffffff',
+    colorDanger:                  '#f87171',
+    borderRadius:                 '12px',
+    fontFamily:                   "'Inter', sans-serif",
+    fontSize:                     '15px',
+  },
+  elements: {
+    rootBox:    { width: '100%' },
+    card:       { background: 'transparent', boxShadow: 'none', border: 'none', padding: '0' },
+    headerTitle:    { display: 'none' },
+    headerSubtitle: { display: 'none' },
+    formButtonPrimary: {
+      background:    'linear-gradient(135deg,#f97316,#ea580c)',
+      border:        'none',
+      fontWeight:    '700',
+      letterSpacing: '0.01em',
+    },
+    formFieldInput: {
+      background:  '#0d1f35',
+      border:      '1px solid rgba(255,255,255,0.08)',
+      color:       '#e2e8f0',
+      borderRadius:'10px',
+    },
+    formFieldLabel:           { color: '#94a3b8', fontSize: '13px' },
+    identityPreviewText:      { color: '#e2e8f0' },
+    footerActionLink:         { color: '#f97316' },
+    dividerLine:              { background: 'rgba(255,255,255,0.08)' },
+    dividerText:              { color: '#64748b' },
+    socialButtonsBlockButton: {
+      background:   'rgba(255,255,255,0.04)',
+      border:       '1px solid rgba(255,255,255,0.08)',
+      color:        '#e2e8f0',
+      borderRadius: '10px',
+    },
+    alertText: { color: '#f87171' },
+  },
+};
+
+async function initClerk() {
+  try {
+    clerk = new window.Clerk(CLERK_PUB_KEY);
+    await clerk.load();
+
+    clerk.addListener(({ user }) => {
+      updateNavAuth(user);
+      if (user) {
+        const activePage = document.querySelector('.page.active')?.id;
+        if (activePage === 'page-login' || activePage === 'page-signup') {
+          const name = user.firstName || user.emailAddresses?.[0]?.emailAddress || 'vous';
+          showNotif(`✓ Bienvenue, ${name} !`);
+          showPage('ai');
+        }
+      }
+    });
+
+    updateNavAuth(clerk.user);
+  } catch (e) {
+    console.error('Clerk init error:', e);
+  }
 }
 
-function updateNavAuth() {
-  const user = getCurrentUser();
-  const lo = document.getElementById('navLoggedOut');
-  const li = document.getElementById('navLoggedIn');
+function updateNavAuth(user) {
+  user = user ?? clerk?.user ?? null;
+  const lo  = document.getElementById('navLoggedOut');
+  const li  = document.getElementById('navLoggedIn');
   const mlo = document.getElementById('mobileLoggedOut');
   const mli = document.getElementById('mobileLoggedIn');
-  if (user) {
-    if (lo) lo.style.display = 'none';
-    if (li) { li.style.display = 'flex'; document.getElementById('navUserName').textContent = user.name; }
+  const displayName = user
+    ? (user.firstName || user.emailAddresses?.[0]?.emailAddress || 'Mon compte')
+    : null;
+
+  if (displayName) {
+    if (lo)  lo.style.display  = 'none';
+    if (li)  { li.style.display = 'flex'; document.getElementById('navUserName').textContent = displayName; }
     if (mlo) mlo.style.display = 'none';
-    if (mli) { mli.style.display = 'block'; document.getElementById('mobileUserName').textContent = user.name; }
+    if (mli) { mli.style.display = 'block'; document.getElementById('mobileUserName').textContent = displayName; }
   } else {
-    if (lo) lo.style.display = 'flex';
-    if (li) li.style.display = 'none';
+    if (lo)  lo.style.display  = 'flex';
+    if (li)  li.style.display  = 'none';
     if (mlo) mlo.style.display = 'block';
     if (mli) mli.style.display = 'none';
   }
 }
 
-function registerUser() {
-  const name    = document.getElementById('signupName').value.trim();
-  const email   = document.getElementById('signupEmail').value.trim().toLowerCase();
-  const pass    = document.getElementById('signupPassword').value;
-  const confirm = document.getElementById('signupPasswordConfirm').value;
-  const errEl   = document.getElementById('signupError');
-  const okEl    = document.getElementById('signupSuccess');
-  errEl.style.display = 'none';
-  okEl.style.display  = 'none';
-
-  if (!name)  { errEl.textContent = 'Veuillez entrer votre nom.'; errEl.style.display = 'block'; return; }
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { errEl.textContent = 'Email invalide.'; errEl.style.display = 'block'; return; }
-  if (pass.length < 8) { errEl.textContent = 'Le mot de passe doit contenir au moins 8 caractères.'; errEl.style.display = 'block'; return; }
-  if (pass !== confirm) { errEl.textContent = 'Les mots de passe ne correspondent pas.'; errEl.style.display = 'block'; return; }
-
-  const users = getUsers();
-  if (users.find(u => u.email === email)) { errEl.textContent = 'Un compte existe déjà avec cet email.'; errEl.style.display = 'block'; return; }
-
-  const user = { name, email, password: btoa(pass), plan: 'gratuit', createdAt: new Date().toISOString() };
-  users.push(user);
-  saveUsers(users);
-  sessionStorage.setItem('archiva_session', JSON.stringify({ name, email, plan: 'gratuit' }));
-  updateNavAuth();
-  okEl.style.display = 'block';
-  setTimeout(() => showPage('ai'), 1200);
+function mountClerkSignIn() {
+  if (!clerk) return;
+  const el = document.getElementById('clerk-sign-in');
+  if (!el || clerkSignInMounted) return;
+  clerk.mountSignIn(el, { appearance: clerkAppearance, routing: 'virtual' });
+  clerkSignInMounted = true;
 }
 
-function loginUser() {
-  const email  = document.getElementById('loginEmail').value.trim().toLowerCase();
-  const pass   = document.getElementById('loginPassword').value;
-  const errEl  = document.getElementById('loginError');
-  errEl.style.display = 'none';
-
-  if (!email) { errEl.textContent = 'Veuillez entrer votre email.'; errEl.style.display = 'block'; return; }
-  if (!pass)  { errEl.textContent = 'Veuillez entrer votre mot de passe.'; errEl.style.display = 'block'; return; }
-
-  const users = getUsers();
-  const user  = users.find(u => u.email === email && u.password === btoa(pass));
-  if (!user) { errEl.textContent = 'Email ou mot de passe incorrect.'; errEl.style.display = 'block'; return; }
-
-  sessionStorage.setItem('archiva_session', JSON.stringify({ name: user.name, email: user.email, plan: user.plan }));
-  updateNavAuth();
-  showNotif(`✓ Bienvenue, ${user.name} !`);
-  showPage('ai');
+function mountClerkSignUp() {
+  if (!clerk) return;
+  const el = document.getElementById('clerk-sign-up');
+  if (!el || clerkSignUpMounted) return;
+  clerk.mountSignUp(el, { appearance: clerkAppearance, routing: 'virtual' });
+  clerkSignUpMounted = true;
 }
 
 function logoutUser() {
-  sessionStorage.removeItem('archiva_session');
-  updateNavAuth();
-  showPage('home');
-  showNotif('Vous êtes déconnecté.');
+  clerk?.signOut().then(() => {
+    updateNavAuth(null);
+    showPage('home');
+    showNotif('Vous êtes déconnecté.');
+  });
 }
 
 // ── NAVIGATION ─────────────────────────────────────────────
@@ -171,6 +211,8 @@ function showPage(name) {
   const link = document.querySelector(`.nav-link[data-page="${name}"]`);
   if (link) link.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (name === 'login')  setTimeout(mountClerkSignIn,  100);
+  if (name === 'signup') setTimeout(mountClerkSignUp, 100);
 }
 
 function toggleMobile() {

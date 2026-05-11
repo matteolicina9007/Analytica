@@ -1215,27 +1215,23 @@ details.api-help summary::-webkit-details-marker{display:none}
   padding:2.5rem 2rem;
   backdrop-filter:blur(20px);
 }
+.auth-box-clerk{max-width:480px;padding:2rem 1.75rem}
 .auth-logo{
   display:flex;align-items:center;gap:.6rem;
-  margin-bottom:2rem;
+  margin-bottom:1.5rem;
 }
-.auth-title{font-size:1.5rem;font-weight:800;color:var(--white);margin:0 0 .4rem}
-.auth-sub{font-size:.875rem;color:var(--t400);margin:0 0 2rem}
-.auth-error{
-  background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);
-  border-radius:var(--r);padding:.75rem 1rem;
-  font-size:.85rem;color:#f87171;margin-bottom:1.25rem;
-}
-.auth-success{
-  background:rgba(34,197,94,.1);border:1px solid rgba(34,197,94,.3);
-  border-radius:var(--r);padding:.75rem 1rem;
-  font-size:.85rem;color:#4ade80;margin-bottom:1.25rem;
-}
+.auth-title{font-size:1.4rem;font-weight:800;color:var(--white);margin:0 0 .3rem}
+.auth-sub{font-size:.875rem;color:var(--t400);margin:0 0 1.5rem}
 .auth-switch{
-  text-align:center;font-size:.85rem;color:var(--t400);margin-top:1.5rem 0 0;
+  text-align:center;font-size:.85rem;color:var(--t400);margin-top:1.25rem;
 }
 .auth-switch a{color:var(--orange2);cursor:pointer;font-weight:600}
 .auth-switch a:hover{color:var(--orange)}
+/* Clerk component overrides */
+#clerk-sign-in .cl-rootBox,
+#clerk-sign-up .cl-rootBox { width:100% }
+#clerk-sign-in .cl-card,
+#clerk-sign-up .cl-card { padding:0;background:transparent;box-shadow:none;border:none }
 
 /* ── NAVBAR USER BADGE ── */
 .nav-user-badge{
