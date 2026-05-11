@@ -20,6 +20,7 @@ const state = {
   selectedStorageFiles: new Set(),
   charts: [],
   pricingAnnual: false,
+  userPlan: 'gratuit',
 };
 
 // Bibliothèque partagée (sessionStorage)
@@ -140,6 +141,7 @@ async function initClerk() {
     clerk.addListener(({ user }) => {
       updateNavAuth(user);
       if (user) {
+        fetchUserPlan();
         const activePage = document.querySelector('.page.active')?.id;
         if (activePage === 'page-login' || activePage === 'page-signup') {
           const name = user.firstName || user.emailAddresses?.[0]?.emailAddress || 'vous';
@@ -197,9 +199,45 @@ function mountClerkSignUp() {
 function logoutUser() {
   clerk?.signOut().then(() => {
     updateNavAuth(null);
+    state.userPlan = 'gratuit';
     showPage('home');
     showNotif('Vous êtes déconnecté.');
   });
+}
+
+// ── API BACKEND ────────────────────────────────────────────
+async function apiRequest(path, options = {}) {
+  const token = await clerk?.session?.getToken();
+  if (!token) throw new Error('Non authentifié');
+  const res = await fetch(path, {
+    ...options,
+    headers: {
+      'Content-Type':  'application/json',
+      'Authorization': `Bearer ${token}`,
+      ...(options.headers || {}),
+    },
+  });
+  if (!res.ok) throw new Error(`Erreur API ${res.status}`);
+  return res.json();
+}
+
+async function fetchUserPlan() {
+  try {
+    const data = await apiRequest('/api/me');
+    state.userPlan = data.plan || 'gratuit';
+    updatePlanBadge(data);
+  } catch {
+    state.userPlan = 'gratuit';
+  }
+}
+
+function updatePlanBadge(user) {
+  const planLabels = { gratuit: 'Gratuit', pro: 'Pro', entreprise: 'Entreprise', 'sur-devis': 'Sur devis' };
+  const badge = document.getElementById('navUserName');
+  if (badge && user) {
+    const plan = user.plan && user.plan !== 'gratuit' ? ` · ${planLabels[user.plan] || user.plan}` : '';
+    badge.textContent = (user.name || 'Utilisateur') + plan;
+  }
 }
 
 // ── NAVIGATION ─────────────────────────────────────────────
