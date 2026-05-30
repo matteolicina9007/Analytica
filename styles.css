@@ -1241,3 +1241,74 @@ details.api-help summary::-webkit-details-marker{display:none}
   font-size:.82rem;font-weight:600;color:var(--t200);
 }
 .nav-user-ico{font-size:.9rem}
+
+/* ── A.E.L CORPORATION LABEL ── */
+.ael-corp-label{
+  font-size:.7rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--orange);opacity:.8;margin-bottom:.6rem;
+}
+
+/* ── INTÉGRATIONS ── */
+.integrations-section{
+  max-width:900px;margin:3rem auto 0;
+  padding:2rem;
+  background:var(--glass);border:1px solid var(--border);border-radius:var(--r-xl);
+}
+.integrations-grid{
+  display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:.75rem;
+}
+.integ-card{
+  display:flex;align-items:center;gap:.75rem;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:.85rem 1rem;transition:border-color .2s;
+}
+.integ-card:hover{border-color:rgba(249,115,22,.3)}
+.integ-logo{font-size:1.5rem;min-width:2rem;text-align:center}
+.integ-info{flex:1;min-width:0}
+.integ-name{font-size:.875rem;font-weight:700;color:var(--white)}
+.integ-desc{font-size:.75rem;color:var(--t500)}
+.integ-status{margin-right:.25rem}
+.integ-dot{
+  display:inline-block;width:8px;height:8px;border-radius:50%;
+  background:var(--t600);
+}
+.integ-dot.on{background:#22c55e;box-shadow:0 0 6px rgba(34,197,94,.5)}
+.integ-dot.soon{background:#f59e0b}
+.integ-btn{white-space:nowrap;font-size:.75rem}
+
+/* ── CLÉ API ARCHIVA ── */
+.api-key-section{
+  max-width:900px;margin:1.5rem auto 3rem;
+  padding:2rem;
+  background:var(--glass);border:1px solid var(--border);border-radius:var(--r-xl);
+}
+.apikey-box{
+  display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r-lg);
+  padding:1.25rem 1.5rem;margin-bottom:1.5rem;
+}
+.apikey-info{flex:1;min-width:0}
+.apikey-status-row{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem}
+.apikey-display{display:flex;align-items:center;gap:.5rem;margin-top:.5rem}
+.apikey-input{
+  font-family:monospace;font-size:.78rem;letter-spacing:.04em;
+  flex:1;min-width:0;padding:.4rem .75rem;
+}
+.apikey-actions{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+.apikey-usage{margin-top:0}
+.apikey-usage-title{font-size:.82rem;font-weight:700;color:var(--t200);margin-bottom:.75rem}
+.apikey-usage-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:.75rem}
+.apikey-usage-card{
+  display:flex;align-items:flex-start;gap:.75rem;
+  background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);
+  padding:.875rem 1rem;font-size:.78rem;color:var(--t400);line-height:1.5;
+}
+.apikey-usage-ico{font-size:1.25rem;margin-top:.1rem}
+.apikey-usage-card code{
+  background:rgba(249,115,22,.12);color:var(--orange2);
+  border-radius:4px;padding:.1rem .3rem;font-size:.72rem;
+}
+@media(max-width:640px){
+  .integrations-grid{grid-template-columns:1fr}
+  .apikey-box{flex-direction:column;align-items:flex-start}
+}

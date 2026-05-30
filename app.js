@@ -78,6 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   renderLibrary();
   renderPartners();
+  renderIntegrations();
+  renderApiKey();
   initClerk();
 });
 
@@ -1080,6 +1082,127 @@ function confirmPurchase() {
     const subjectEl = document.getElementById('cSubject');
     if (subjectEl) subjectEl.value = 'Demande de démonstration';
   }, 300);
+}
+
+// ── INTÉGRATIONS EXTERNES ──────────────────────────────────
+const INTEG_LOGOS = { notion:'📝', gsheets:'📊', airtable:'🗄️', n8n:'⚙️', slack:'💬', excel:'📈', trello:'📌', googlekeep:'🟡' };
+
+function loadIntegrations() {
+  try { return JSON.parse(localStorage.getItem('archiva_integrations') || '{}'); } catch { return {}; }
+}
+function saveIntegrations(obj) { localStorage.setItem('archiva_integrations', JSON.stringify(obj)); }
+
+function renderIntegrations() {
+  const integs = loadIntegrations();
+  Object.keys(INTEG_LOGOS).forEach(key => {
+    const dot = document.getElementById('status-' + key)?.querySelector('.integ-dot');
+    const btn = document.querySelector(`#integ-${key} .integ-btn`);
+    if (!dot) return;
+    if (integs[key]) {
+      dot.className = 'integ-dot on';
+      if (btn && !btn.disabled) { btn.textContent = 'Déconnecter'; btn.onclick = () => disconnectInteg(key); }
+    } else {
+      dot.className = key === 'googlekeep' ? 'integ-dot soon' : 'integ-dot off';
+    }
+  });
+}
+
+let currentIntegKey = '';
+function openIntegModal(key, name, desc, placeholder) {
+  const integs = loadIntegrations();
+  currentIntegKey = key;
+  document.getElementById('integModalLogo').textContent  = INTEG_LOGOS[key] || '🔗';
+  document.getElementById('integModalTitle').textContent = 'Connecter ' + name;
+  document.getElementById('integModalDesc').textContent  = desc;
+  document.getElementById('integModalInput').placeholder = placeholder;
+  document.getElementById('integModalInput').value       = integs[key] || '';
+  document.getElementById('integModalError').style.display = 'none';
+  document.getElementById('integModal').style.display   = 'flex';
+  setTimeout(() => document.getElementById('integModalInput').focus(), 80);
+}
+function closeIntegModal() { document.getElementById('integModal').style.display = 'none'; }
+
+function saveIntegration() {
+  const val = document.getElementById('integModalInput').value.trim();
+  if (!val) { document.getElementById('integModalError').textContent = 'Veuillez entrer une clé ou un token.'; document.getElementById('integModalError').style.display = 'block'; return; }
+  const integs = loadIntegrations();
+  integs[currentIntegKey] = val;
+  saveIntegrations(integs);
+  renderIntegrations();
+  closeIntegModal();
+  showNotif('✓ ' + (currentIntegKey.charAt(0).toUpperCase() + currentIntegKey.slice(1)) + ' connecté.');
+}
+
+function disconnectInteg(key) {
+  const integs = loadIntegrations();
+  delete integs[key];
+  saveIntegrations(integs);
+  renderIntegrations();
+  showNotif('Intégration déconnectée.');
+}
+
+// ── CLÉ API ARCHIVA ─────────────────────────────────────────
+function generateApiKey() {
+  const arr = new Uint8Array(32);
+  crypto.getRandomValues(arr);
+  const key = 'arch_' + Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
+  localStorage.setItem('archiva_api_key', key);
+  renderApiKey();
+  showNotif('✓ Clé API générée. Gardez-la secrète !');
+}
+
+function renderApiKey() {
+  const key  = localStorage.getItem('archiva_api_key');
+  const dot  = document.getElementById('apikeyStatusDot');
+  const txt  = document.getElementById('apikeyStatusText');
+  const disp = document.getElementById('apikeyDisplay');
+  const inp  = document.getElementById('apikeyValue');
+  const gen  = document.getElementById('apikeyGenBtn');
+  const rev  = document.getElementById('apikeyRevokeBtn');
+  if (!dot) return;
+  if (key) {
+    dot.className = 'integ-dot on';
+    txt.textContent = 'Clé active — copiez-la et gardez-la secrète';
+    txt.style.color = '#4ade80';
+    disp.style.display = 'flex';
+    inp.value = '•'.repeat(key.length);
+    inp.dataset.real = key;
+    inp.dataset.hidden = '1';
+    if (gen) gen.textContent = '↺ Régénérer';
+    if (rev) rev.style.display = 'inline-flex';
+  } else {
+    dot.className = 'integ-dot off';
+    txt.textContent = 'Aucune clé générée';
+    txt.style.color = '';
+    disp.style.display = 'none';
+    if (gen) gen.textContent = '✦ Générer ma clé API';
+    if (rev) rev.style.display = 'none';
+  }
+}
+
+function toggleApiKeyVisibility() {
+  const inp = document.getElementById('apikeyValue');
+  if (!inp) return;
+  if (inp.dataset.hidden === '1') {
+    inp.value = inp.dataset.real;
+    inp.dataset.hidden = '0';
+  } else {
+    inp.value = '•'.repeat(inp.dataset.real.length);
+    inp.dataset.hidden = '1';
+  }
+}
+
+function copyApiKey() {
+  const key = localStorage.getItem('archiva_api_key');
+  if (!key) return;
+  navigator.clipboard.writeText(key).then(() => showNotif('✓ Clé copiée dans le presse-papiers.'));
+}
+
+function revokeApiKey() {
+  if (!confirm('Révoquer la clé API ? Les connexions actives seront interrompues.')) return;
+  localStorage.removeItem('archiva_api_key');
+  renderApiKey();
+  showNotif('Clé API révoquée.');
 }
 
 // ── CONTACT ────────────────────────────────────────────────

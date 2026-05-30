@@ -92,6 +92,7 @@
     <div class="hero-grid-bg"></div>
     <div class="hero-inner">
       <div class="hero-content">
+        <div class="ael-corp-label">A.E.L Corporation</div>
         <div class="hero-badge"><span class="pulse"></span>Propulsé par Claude &amp; Mistral AI</div>
         <h1 class="hero-title">L'intelligence<br><span class="gradient-text">documentaire</span><br>pour votre entreprise</h1>
         <p class="hero-sub">Générez, analysez et gérez tous vos documents professionnels en quelques secondes. Extraction, rapports visuels, email &amp; cloud — tout connecté.</p>
@@ -448,8 +449,167 @@
       </div>
     </div>
 
+    <!-- ══ INTÉGRATIONS EXTERNES ══ -->
+    <div class="integrations-section">
+      <div class="sec-label" style="margin-bottom:1rem"><span class="dot"></span>Connecteurs externes</div>
+      <h2 style="font-size:1.3rem;margin:0 0 .4rem">Connectez vos outils <span class="gradient-text">préférés</span></h2>
+      <p style="font-size:.875rem;color:var(--t400);margin:0 0 1.75rem">Importez vos données directement depuis vos applications — aucun export manuel requis.</p>
+      <div class="integrations-grid" id="integrationsGrid">
+
+        <div class="integ-card" id="integ-notion">
+          <div class="integ-logo">📝</div>
+          <div class="integ-info">
+            <div class="integ-name">Notion</div>
+            <div class="integ-desc">Pages, bases de données, notes</div>
+          </div>
+          <div class="integ-status" id="status-notion"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('notion','Notion','Entrez votre clé API Notion (Integration Token)','secret_...')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-gsheets">
+          <div class="integ-logo">📊</div>
+          <div class="integ-info">
+            <div class="integ-name">Google Sheets</div>
+            <div class="integ-desc">Feuilles de calcul &amp; tableaux</div>
+          </div>
+          <div class="integ-status" id="status-gsheets"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('gsheets','Google Sheets','Entrez votre clé API Google (Service Account ou API Key)','AIza...')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-airtable">
+          <div class="integ-logo">🗄️</div>
+          <div class="integ-info">
+            <div class="integ-name">Airtable</div>
+            <div class="integ-desc">Bases de données &amp; CRM</div>
+          </div>
+          <div class="integ-status" id="status-airtable"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('airtable','Airtable','Entrez votre Personal Access Token Airtable','pat...')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-n8n">
+          <div class="integ-logo">⚙️</div>
+          <div class="integ-info">
+            <div class="integ-name">N8N</div>
+            <div class="integ-desc">Automatisations &amp; workflows</div>
+          </div>
+          <div class="integ-status" id="status-n8n"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('n8n','N8N','Entrez l\'URL de votre instance N8N','https://votre-n8n.app')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-slack">
+          <div class="integ-logo">💬</div>
+          <div class="integ-info">
+            <div class="integ-name">Slack</div>
+            <div class="integ-desc">Messages &amp; fichiers partagés</div>
+          </div>
+          <div class="integ-status" id="status-slack"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('slack','Slack','Entrez votre Slack Bot Token','xoxb-...')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-excel">
+          <div class="integ-logo">📈</div>
+          <div class="integ-info">
+            <div class="integ-name">Excel / OneDrive</div>
+            <div class="integ-desc">Fichiers Microsoft Office</div>
+          </div>
+          <div class="integ-status" id="status-excel"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('excel','Excel / OneDrive','Entrez votre Microsoft Graph API Token','eyJ...')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-trello">
+          <div class="integ-logo">📌</div>
+          <div class="integ-info">
+            <div class="integ-name">Trello</div>
+            <div class="integ-desc">Tableaux Kanban &amp; cartes</div>
+          </div>
+          <div class="integ-status" id="status-trello"><span class="integ-dot off"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('trello','Trello','Entrez votre Trello API Key','...')">Connecter</button>
+        </div>
+
+        <div class="integ-card" id="integ-googlekeep">
+          <div class="integ-logo">🟡</div>
+          <div class="integ-info">
+            <div class="integ-name">Google Keep</div>
+            <div class="integ-desc">Notes &amp; listes rapides</div>
+          </div>
+          <div class="integ-status" id="status-googlekeep"><span class="integ-dot soon"></span></div>
+          <button class="btn btn-sm btn-ghost integ-btn" disabled style="opacity:.4;cursor:not-allowed">Bientôt</button>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ══ CLÉ API ARCHIVA ══ -->
+    <div class="api-key-section">
+      <div class="sec-label" style="margin-bottom:1rem"><span class="dot"></span>Accès développeur</div>
+      <h2 style="font-size:1.3rem;margin:0 0 .4rem">Clé API <span class="gradient-text">Archiva</span></h2>
+      <p style="font-size:.875rem;color:var(--t400);margin:0 0 1.75rem">Connectez Archiva à N8N, Make, Claude ou tout autre outil compatible REST API. Gratuit, instantané.</p>
+
+      <div class="apikey-box">
+        <div class="apikey-info">
+          <div class="apikey-status-row">
+            <span id="apikeyStatusDot" class="integ-dot off"></span>
+            <span id="apikeyStatusText" style="font-size:.82rem;color:var(--t400)">Aucune clé générée</span>
+          </div>
+          <div class="apikey-display" id="apikeyDisplay" style="display:none">
+            <input type="text" class="form-input apikey-input" id="apikeyValue" readonly>
+            <button class="btn btn-sm btn-ghost" onclick="copyApiKey()">📋 Copier</button>
+            <button class="btn btn-sm btn-ghost" onclick="toggleApiKeyVisibility()">👁️</button>
+          </div>
+        </div>
+        <div class="apikey-actions">
+          <button class="btn btn-primary" id="apikeyGenBtn" onclick="generateApiKey()">
+            ✦ Générer ma clé API
+          </button>
+          <button class="btn btn-ghost" id="apikeyRevokeBtn" style="display:none;color:var(--red)" onclick="revokeApiKey()">
+            Révoquer
+          </button>
+        </div>
+      </div>
+
+      <div class="apikey-usage">
+        <div class="apikey-usage-title">Comment utiliser votre clé</div>
+        <div class="apikey-usage-grid">
+          <div class="apikey-usage-card">
+            <div class="apikey-usage-ico">⚙️</div>
+            <div><strong>N8N</strong><br><span>HTTP Request → Header : <code>Authorization: Bearer VOTRE_CLÉ</code></span></div>
+          </div>
+          <div class="apikey-usage-card">
+            <div class="apikey-usage-ico">🤖</div>
+            <div><strong>Claude / Make</strong><br><span>Connecteur HTTP → API Key dans les headers</span></div>
+          </div>
+          <div class="apikey-usage-card">
+            <div class="apikey-usage-ico">💻</div>
+            <div><strong>Code</strong><br><span><code>fetch('/api/me', &#123; headers: &#123; Authorization: 'Bearer CLÉ' &#125; &#125;)</code></span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </div><!-- /page-ai -->
+
+<!-- MODAL INTÉGRATION -->
+<div id="integModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeIntegModal()">
+  <div class="modal-box" style="max-width:460px">
+    <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem">
+      <div id="integModalLogo" style="font-size:2rem"></div>
+      <div>
+        <h3 style="margin:0 0 .2rem" id="integModalTitle">Connecter</h3>
+        <p style="font-size:.8rem;color:var(--t400);margin:0" id="integModalDesc"></p>
+      </div>
+    </div>
+    <div class="form-field">
+      <label id="integModalLabel">Token / Clé API</label>
+      <input type="password" class="form-input" id="integModalInput" placeholder="">
+    </div>
+    <div id="integModalError" style="display:none;font-size:.82rem;color:var(--red);margin-top:.5rem"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem">
+      <button class="btn btn-ghost" onclick="closeIntegModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveIntegration()">Connecter</button>
+    </div>
+  </div>
+</div>
 
 
 <!-- ══════════════════════════════════════
@@ -549,8 +709,8 @@
         <div class="price-per" id="priceProPer">/mois par utilisateur</div>
         <p class="price-note" id="priceProNote">Pour les professionnels et PMEs</p>
         <ul class="price-list">
-          <li>12 documents générés / mois</li><li>Tous types de génération</li>
-          <li>Extraction PDF, DOCX, XLSX</li><li>10 rapports + graphiques / mois</li>
+          <li>10 documents générés / mois</li><li>Tous types de génération</li>
+          <li>8 extractions de docs / mois</li><li>8 rapports + graphiques / mois</li>
           <li>Bibliothèque IA illimitée</li><li>Gmail &amp; Outlook connectés</li>
           <li>Google Drive, Dropbox, OneDrive</li><li>Export PDF illimité</li>
         </ul>
@@ -596,11 +756,11 @@
         <table class="comp-table">
           <thead><tr><th>Fonctionnalité</th><th>Gratuit</th><th class="col-pop">Pro</th><th>Entreprise</th><th class="col-custom">Sur devis</th></tr></thead>
           <tbody>
-            <tr><td>Documents générés / mois</td><td>5</td><td class="col-pop">12 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Documents générés / mois</td><td>5</td><td class="col-pop">10 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
             <tr><td>Bibliothèque IA partagée</td><td>10 docs</td><td class="col-pop">Illimité</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
             <tr><td>Recherche IA cross-modules</td><td>✓</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
-            <tr><td>Extraction de fichiers</td><td>TXT, CSV</td><td class="col-pop">Tous formats</td><td>Tous formats</td><td class="col-custom">Tous formats</td></tr>
-            <tr><td>Rapports avec graphiques</td><td>1/rapport</td><td class="col-pop">10 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Extraction de fichiers</td><td>TXT, CSV</td><td class="col-pop">8 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
+            <tr><td>Rapports avec graphiques</td><td>1/rapport</td><td class="col-pop">8 / mois</td><td>Illimité</td><td class="col-custom">Illimité</td></tr>
             <tr><td>Connexion email</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
             <tr><td>Stockage cloud</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
             <tr><td>Marque blanche (revendeur)</td><td>✗</td><td class="col-pop">✓</td><td>✓</td><td class="col-custom">✓</td></tr>
