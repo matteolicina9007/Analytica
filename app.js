@@ -81,6 +81,7 @@ document.addEventListener('DOMContentLoaded', () => {
   renderIntegrations();
   renderApiKey();
   initClerk();
+  handleStripeReturn();
 });
 
 // ── AUTHENTIFICATION — CLERK ────────────────────────────────
@@ -1039,11 +1040,32 @@ function confirmDeletePartner(index) {
   }
 }
 
-// ── MODAL ACHAT (code partenaire) ──────────────────────────
-function openPurchaseModal(planName, planPrice) {
-  document.getElementById('purchasePlanName').textContent  = planName;
-  document.getElementById('purchasePlanBadge').textContent = planName;
-  document.getElementById('purchasePlanPrice').textContent = planPrice;
+// ── MODAL ACHAT + STRIPE ───────────────────────────────────
+const STRIPE_PUB_KEY = 'pk_live_51TPbrzJqhcsMOyVS72huiP10Z3oll5Rl1r8hn7Vhq2hV48B5CvN4PJ9T2FFtznTspqdz5EufdhxJpRN8Logbjxet00A3nrZzA8';
+
+const STRIPE_PRODUCTS = {
+  'pro-mensuel':        'prod_UOOnnUxP5ugY6J',
+  'pro-annuel':         'prod_UToPyjLGc4P78s',
+  'entreprise-mensuel': 'prod_UTl6uQBtZfbgwN',
+  'entreprise-annuel':  'prod_UTl7nKtP1jGmaQ',
+};
+
+const PLAN_LABELS = {
+  'pro':        { name: 'Pro',        mensuel: '57€/mois',  annuel: '48€/mois' },
+  'entreprise': { name: 'Entreprise', mensuel: '147€/mois', annuel: '125€/mois' },
+};
+
+let currentPurchasePlanKey = '';
+
+function openPurchaseModal(planKey) {
+  if (planKey === 'sur-devis') { showPage('contact'); return; }
+  currentPurchasePlanKey = planKey;
+  const period   = state.pricingAnnual ? 'annuel' : 'mensuel';
+  const label    = PLAN_LABELS[planKey];
+  const price    = label[period];
+  document.getElementById('purchasePlanName').textContent  = label.name;
+  document.getElementById('purchasePlanBadge').textContent = label.name;
+  document.getElementById('purchasePlanPrice').textContent = price + (state.pricingAnnual ? ' · facturation annuelle' : '');
   document.getElementById('purchasePartnerCode').value     = '';
   document.getElementById('purchaseModal').style.display   = 'flex';
   setTimeout(() => document.getElementById('purchasePartnerCode').focus(), 50);
@@ -1051,37 +1073,68 @@ function openPurchaseModal(planName, planPrice) {
 function closePurchaseModal() {
   document.getElementById('purchaseModal').style.display = 'none';
 }
-function confirmPurchase() {
-  const planName = document.getElementById('purchasePlanName').textContent;
-  const planPrice = document.getElementById('purchasePlanPrice').textContent;
+
+async function confirmPurchase() {
   const code = document.getElementById('purchasePartnerCode').value.trim().toUpperCase();
 
   if (code) {
-    const partners = loadPartners();
-    const match = partners.find(p => p.code === code);
-    if (!match) {
-      showNotif('Code partenaire non reconnu. Laissez le champ vide pour continuer sans code.');
-      return;
-    }
+    const match = loadPartners().find(p => p.code === code);
+    if (!match) { showNotif('Code partenaire non reconnu. Laissez le champ vide pour continuer.'); return; }
   }
 
-  sessionStorage.setItem('archiva_purchase_plan', `${planName} — ${planPrice}`);
+  if (!clerk?.user) {
+    showNotif('Veuillez vous connecter avant de souscrire.');
+    closePurchaseModal();
+    showPage('login');
+    return;
+  }
+
+  const period    = state.pricingAnnual ? 'annuel' : 'mensuel';
+  const productId = STRIPE_PRODUCTS[currentPurchasePlanKey + '-' + period];
+
   if (code) sessionStorage.setItem('archiva_partner_code', code);
   else      sessionStorage.removeItem('archiva_partner_code');
 
-  closePurchaseModal();
-  showPage('contact');
+  const btn = document.querySelector('#purchaseModal .btn-primary');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Redirection…'; }
 
-  if (code) {
-    const partners = loadPartners();
-    const match = partners.find(p => p.code === code);
-    showNotif(`✓ Code ${code} reconnu — partenaire : ${match.title}`);
+  try {
+    const data = await apiRequest('/api/stripe/checkout', {
+      method: 'POST',
+      body: JSON.stringify({ productId }),
+    });
+    if (data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Erreur inconnue');
+    }
+  } catch (err) {
+    showNotif('Erreur lors du paiement : ' + err.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Continuer vers le paiement →'; }
   }
+}
 
-  setTimeout(() => {
-    const subjectEl = document.getElementById('cSubject');
-    if (subjectEl) subjectEl.value = 'Demande de démonstration';
-  }, 300);
+// Gère le retour depuis Stripe (success ou cancelled)
+function handleStripeReturn() {
+  const params  = new URLSearchParams(window.location.search);
+  const payment = params.get('payment');
+  if (!payment) return;
+  window.history.replaceState({}, '', '/');
+  if (payment === 'success') {
+    const sessionId = params.get('session_id');
+    showNotif('🎉 Paiement réussi ! Votre abonnement est activé.');
+    if (sessionId && clerk?.user) {
+      apiRequest(`/api/stripe/session/${sessionId}`).then(data => {
+        if (data.planInfo) {
+          state.userPlan = data.planInfo.plan;
+          showNotif(`✓ Plan ${data.planInfo.plan} actif — bienvenue !`);
+          fetchUserPlan();
+        }
+      }).catch(() => {});
+    }
+  } else if (payment === 'cancelled') {
+    showNotif('Paiement annulé. Vous pouvez réessayer à tout moment.');
+  }
 }
 
 // ── INTÉGRATIONS EXTERNES ──────────────────────────────────
