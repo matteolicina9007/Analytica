@@ -80,94 +80,146 @@ document.addEventListener('DOMContentLoaded', () => {
   renderPartners();
   renderIntegrations();
   renderApiKey();
-  initClerk();
+  initKinde();
   handleStripeReturn();
 });
 
-// ── AUTHENTIFICATION — CLERK ────────────────────────────────
-const CLERK_PUB_KEY = 'pk_test_dWx0aW1hdGUtYm9uZWZpc2gtNTIuY2xlcmsuYWNjb3VudHMuZGV2JA';
-let clerk = null;
-let clerkSignInMounted = false;
-let clerkSignUpMounted = false;
+// ── AUTHENTIFICATION — KINDE PKCE ──────────────────────────
+const KINDE_DOMAIN    = 'https://aelcorporation.kinde.com';
+const KINDE_CLIENT_ID = 'a398643a85044a7fba7f89994be28c5a';
+const KINDE_REDIRECT  = window.location.origin + '/';
 
-const clerkAppearance = {
-  variables: {
-    colorPrimary:                 '#f97316',
-    colorBackground:              '#070f1e',
-    colorInputBackground:         '#0d1f35',
-    colorInputText:               '#e2e8f0',
-    colorText:                    '#e2e8f0',
-    colorTextSecondary:           '#94a3b8',
-    colorTextOnPrimaryBackground: '#ffffff',
-    colorDanger:                  '#f87171',
-    borderRadius:                 '12px',
-    fontFamily:                   "'Inter', sans-serif",
-    fontSize:                     '15px',
-  },
-  elements: {
-    rootBox:    { width: '100%' },
-    card:       { background: 'transparent', boxShadow: 'none', border: 'none', padding: '0' },
-    headerTitle:    { display: 'none' },
-    headerSubtitle: { display: 'none' },
-    formButtonPrimary: {
-      background:    'linear-gradient(135deg,#f97316,#ea580c)',
-      border:        'none',
-      fontWeight:    '700',
-      letterSpacing: '0.01em',
-    },
-    formFieldInput: {
-      background:  '#0d1f35',
-      border:      '1px solid rgba(255,255,255,0.08)',
-      color:       '#e2e8f0',
-      borderRadius:'10px',
-    },
-    formFieldLabel:           { color: '#94a3b8', fontSize: '13px' },
-    identityPreviewText:      { color: '#e2e8f0' },
-    footerActionLink:         { color: '#f97316' },
-    dividerLine:              { background: 'rgba(255,255,255,0.08)' },
-    dividerText:              { color: '#64748b' },
-    socialButtonsBlockButton: {
-      background:   'rgba(255,255,255,0.04)',
-      border:       '1px solid rgba(255,255,255,0.08)',
-      color:        '#e2e8f0',
-      borderRadius: '10px',
-    },
-    alertText: { color: '#f87171' },
-  },
-};
+function b64urlEncode(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)))
+    .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
 
-async function initClerk() {
+async function generatePKCE() {
+  const verifier  = b64urlEncode(crypto.getRandomValues(new Uint8Array(32)));
+  const hash      = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier));
+  const challenge = b64urlEncode(hash);
+  return { verifier, challenge };
+}
+
+async function kindeLogin() {
+  const { verifier, challenge } = await generatePKCE();
+  const st = b64urlEncode(crypto.getRandomValues(new Uint8Array(16)));
+  sessionStorage.setItem('kinde_verifier', verifier);
+  sessionStorage.setItem('kinde_state',    st);
+  const params = new URLSearchParams({
+    client_id:             KINDE_CLIENT_ID,
+    redirect_uri:          KINDE_REDIRECT,
+    response_type:         'code',
+    scope:                 'openid profile email',
+    code_challenge:        challenge,
+    code_challenge_method: 'S256',
+    state:                 st,
+  });
+  window.location.href = `${KINDE_DOMAIN}/oauth2/auth?${params}`;
+}
+
+async function kindeRegister() {
+  const { verifier, challenge } = await generatePKCE();
+  const st = b64urlEncode(crypto.getRandomValues(new Uint8Array(16)));
+  sessionStorage.setItem('kinde_verifier', verifier);
+  sessionStorage.setItem('kinde_state',    st);
+  const params = new URLSearchParams({
+    client_id:             KINDE_CLIENT_ID,
+    redirect_uri:          KINDE_REDIRECT,
+    response_type:         'code',
+    scope:                 'openid profile email',
+    code_challenge:        challenge,
+    code_challenge_method: 'S256',
+    state:                 st,
+    prompt:                'create',
+  });
+  window.location.href = `${KINDE_DOMAIN}/oauth2/auth?${params}`;
+}
+
+async function handleKindeCallback() {
+  const params       = new URLSearchParams(window.location.search);
+  const code         = params.get('code');
+  const returnedState = params.get('state');
+  if (!code) return;
+
+  const storedState  = sessionStorage.getItem('kinde_state');
+  const codeVerifier = sessionStorage.getItem('kinde_verifier');
+  sessionStorage.removeItem('kinde_state');
+  sessionStorage.removeItem('kinde_verifier');
+  window.history.replaceState({}, '', '/');
+
+  if (returnedState !== storedState) {
+    console.error('Kinde state mismatch');
+    return;
+  }
+
   try {
-    clerk = new window.Clerk(CLERK_PUB_KEY);
-    await clerk.load();
-
-    clerk.addListener(({ user }) => {
-      updateNavAuth(user);
-      if (user) {
-        fetchUserPlan();
-        const activePage = document.querySelector('.page.active')?.id;
-        if (activePage === 'page-login' || activePage === 'page-signup') {
-          const name = user.firstName || user.emailAddresses?.[0]?.emailAddress || 'vous';
-          showNotif(`✓ Bienvenue, ${name} !`);
-          showPage('ai');
-        }
-      }
+    const res = await fetch(`${KINDE_DOMAIN}/oauth2/token`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        grant_type:    'authorization_code',
+        client_id:     KINDE_CLIENT_ID,
+        redirect_uri:  KINDE_REDIRECT,
+        code,
+        code_verifier: codeVerifier,
+      }),
     });
-
-    updateNavAuth(clerk.user);
+    if (!res.ok) { console.error('Kinde token exchange failed', await res.text()); return; }
+    const tokens = await res.json();
+    localStorage.setItem('kinde_access_token', tokens.access_token);
+    if (tokens.id_token) localStorage.setItem('kinde_id_token', tokens.id_token);
+    if (tokens.expires_in) {
+      localStorage.setItem('kinde_expires_at', String(Date.now() + tokens.expires_in * 1000));
+    }
+    const user = decodeKindeJwt(tokens.id_token || tokens.access_token);
+    updateNavAuth(user);
+    fetchUserPlan();
+    showNotif(`✓ Bienvenue, ${user?.given_name || user?.email || 'vous'} !`);
+    showPage('ai');
   } catch (e) {
-    console.error('Clerk init error:', e);
+    console.error('Kinde callback error:', e);
   }
 }
 
+function decodeKindeJwt(token) {
+  if (!token) return null;
+  try {
+    return JSON.parse(atob(token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')));
+  } catch { return null; }
+}
+
+function getKindeToken() {
+  const token     = localStorage.getItem('kinde_access_token');
+  const expiresAt = parseInt(localStorage.getItem('kinde_expires_at') || '0');
+  if (!token) return null;
+  if (expiresAt && Date.now() > expiresAt) { kindeLogout(); return null; }
+  return token;
+}
+
+function getKindeUser() {
+  const token = getKindeToken();
+  return token ? decodeKindeJwt(token) : null;
+}
+
+function isAuthenticated() {
+  return !!getKindeToken();
+}
+
+function initKinde() {
+  const user = getKindeUser();
+  updateNavAuth(user);
+  if (user) fetchUserPlan();
+  if (window.location.search.includes('code=')) handleKindeCallback();
+}
+
 function updateNavAuth(user) {
-  user = user ?? clerk?.user ?? null;
   const lo  = document.getElementById('navLoggedOut');
   const li  = document.getElementById('navLoggedIn');
   const mlo = document.getElementById('mobileLoggedOut');
   const mli = document.getElementById('mobileLoggedIn');
   const displayName = user
-    ? (user.firstName || user.emailAddresses?.[0]?.emailAddress || 'Mon compte')
+    ? (user.given_name || user.email || 'Mon compte')
     : null;
 
   if (displayName) {
@@ -183,34 +235,22 @@ function updateNavAuth(user) {
   }
 }
 
-function mountClerkSignIn() {
-  if (!clerk) return;
-  const el = document.getElementById('clerk-sign-in');
-  if (!el || clerkSignInMounted) return;
-  clerk.mountSignIn(el, { appearance: clerkAppearance, routing: 'virtual' });
-  clerkSignInMounted = true;
-}
-
-function mountClerkSignUp() {
-  if (!clerk) return;
-  const el = document.getElementById('clerk-sign-up');
-  if (!el || clerkSignUpMounted) return;
-  clerk.mountSignUp(el, { appearance: clerkAppearance, routing: 'virtual' });
-  clerkSignUpMounted = true;
+function kindeLogout() {
+  localStorage.removeItem('kinde_access_token');
+  localStorage.removeItem('kinde_id_token');
+  localStorage.removeItem('kinde_expires_at');
+  updateNavAuth(null);
+  state.userPlan = 'gratuit';
+  window.location.href = `${KINDE_DOMAIN}/logout?redirect=${encodeURIComponent(window.location.origin + '/')}`;
 }
 
 function logoutUser() {
-  clerk?.signOut().then(() => {
-    updateNavAuth(null);
-    state.userPlan = 'gratuit';
-    showPage('home');
-    showNotif('Vous êtes déconnecté.');
-  });
+  kindeLogout();
 }
 
 // ── API BACKEND ────────────────────────────────────────────
 async function apiRequest(path, options = {}) {
-  const token = await clerk?.session?.getToken();
+  const token = getKindeToken();
   if (!token) throw new Error('Non authentifié');
   const res = await fetch(path, {
     ...options,
@@ -252,8 +292,6 @@ function showPage(name) {
   const link = document.querySelector(`.nav-link[data-page="${name}"]`);
   if (link) link.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (name === 'login')  setTimeout(mountClerkSignIn,  100);
-  if (name === 'signup') setTimeout(mountClerkSignUp, 100);
 }
 
 function toggleMobile() {
@@ -1082,7 +1120,7 @@ async function confirmPurchase() {
     if (!match) { showNotif('Code partenaire non reconnu. Laissez le champ vide pour continuer.'); return; }
   }
 
-  if (!clerk?.user) {
+  if (!isAuthenticated()) {
     showNotif('Veuillez vous connecter avant de souscrire.');
     closePurchaseModal();
     showPage('login');
@@ -1123,7 +1161,7 @@ function handleStripeReturn() {
   if (payment === 'success') {
     const sessionId = params.get('session_id');
     showNotif('🎉 Paiement réussi ! Votre abonnement est activé.');
-    if (sessionId && clerk?.user) {
+    if (sessionId && isAuthenticated()) {
       apiRequest(`/api/stripe/session/${sessionId}`).then(data => {
         if (data.planInfo) {
           state.userPlan = data.planInfo.plan;

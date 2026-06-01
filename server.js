@@ -1,22 +1,39 @@
 require('dotenv').config();
-const express         = require('express');
-const { clerkMiddleware, requireAuth, getAuth } = require('@clerk/express');
-const { createClerkClient } = require('@clerk/backend');
-const Stripe          = require('stripe');
-const path            = require('path');
+const express  = require('express');
+const { createRemoteJWKSet, jwtVerify } = require('jose');
+const Stripe   = require('stripe');
+const path     = require('path');
 
-const app         = express();
-const PORT        = process.env.PORT || 3000;
-const stripe      = Stripe(process.env.STRIPE_SECRET_KEY);
-const clerkClient = createClerkClient({ secretKey: process.env.CLERK_SECRET_KEY });
+const app    = express();
+const PORT   = process.env.PORT || 3000;
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
-// Correspondance produit → plan Archiva
+const KINDE_DOMAIN = process.env.KINDE_DOMAIN || 'https://aelcorporation.kinde.com';
+const JWKS = createRemoteJWKSet(new URL(`${KINDE_DOMAIN}/.well-known/jwks`));
+
+// In-memory plan storage (resets on redeploy — acceptable for MVP)
+const userPlans = new Map();
+
 const PRODUCT_PLAN = {
   'prod_UOOnnUxP5ugY6J': { plan: 'pro',        period: 'mensuel' },
   'prod_UToPyjLGc4P78s': { plan: 'pro',        period: 'annuel'  },
   'prod_UTl6uQBtZfbgwN': { plan: 'entreprise', period: 'mensuel' },
   'prod_UTl7nKtP1jGmaQ': { plan: 'entreprise', period: 'annuel'  },
 };
+
+async function requireAuth(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header?.startsWith('Bearer ')) return res.status(401).json({ error: 'Non authentifié' });
+  try {
+    const { payload } = await jwtVerify(header.slice(7), JWKS, { issuer: KINDE_DOMAIN });
+    req.userId    = payload.sub;
+    req.userEmail = payload.email;
+    req.userName  = [payload.given_name, payload.family_name].filter(Boolean).join(' ') || payload.email;
+    next();
+  } catch {
+    return res.status(401).json({ error: 'Token invalide' });
+  }
+}
 
 // ── WEBHOOK STRIPE (raw body — doit être avant express.json) ──
 app.post('/api/stripe/webhook',
@@ -37,33 +54,24 @@ app.post('/api/stripe/webhook',
       const productId = session.metadata?.productId;
       const planInfo  = PRODUCT_PLAN[productId];
       if (userId && planInfo) {
-        try {
-          await clerkClient.users.updateUserMetadata(userId, {
-            publicMetadata: {
-              plan:             planInfo.plan,
-              period:           planInfo.period,
-              stripeCustomerId: session.customer,
-              subscriptionId:   session.subscription,
-            },
-          });
-          console.log(`✓ Plan "${planInfo.plan}" activé pour ${userId}`);
-        } catch (e) {
-          console.error('Clerk metadata update error:', e.message);
-        }
+        userPlans.set(userId, {
+          plan:             planInfo.plan,
+          period:           planInfo.period,
+          stripeCustomerId: session.customer,
+          subscriptionId:   session.subscription,
+        });
+        console.log(`✓ Plan "${planInfo.plan}" activé pour ${userId}`);
       }
     }
 
     if (event.type === 'customer.subscription.deleted') {
-      // Abonnement résilié → retour au plan gratuit
-      const sub    = event.data.object;
-      const custId = sub.customer;
-      try {
-        const customers = await stripe.customers.search({ query: `id:"${custId}"`, limit: 1 });
-        // On retrouve l'userId via les metadata de la session originale — géré via Clerk lookup
-        // Pour l'instant on log, la gestion complète nécessite une DB
-        console.log(`Subscription cancelled for customer ${custId}`);
-      } catch (e) {
-        console.error(e.message);
+      const sub = event.data.object;
+      for (const [uid, data] of userPlans.entries()) {
+        if (data.stripeCustomerId === sub.customer) {
+          userPlans.delete(uid);
+          console.log(`Subscription cancelled for ${uid}`);
+          break;
+        }
       }
     }
 
@@ -73,7 +81,6 @@ app.post('/api/stripe/webhook',
 
 // ── MIDDLEWARES ────────────────────────────────────────────
 app.use(express.json());
-app.use(clerkMiddleware({ secretKey: process.env.CLERK_SECRET_KEY }));
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -90,60 +97,46 @@ app.use(express.static(path.join(__dirname)));
 // ── API ROUTES ─────────────────────────────────────────────
 
 // GET /api/me
-app.get('/api/me', requireAuth(), async (req, res) => {
-  try {
-    const { userId } = getAuth(req);
-    const user = await clerkClient.users.getUser(userId);
-    res.json({
-      id:        user.id,
-      email:     user.emailAddresses[0]?.emailAddress || '',
-      name:      [user.firstName, user.lastName].filter(Boolean).join(' ') || 'Utilisateur',
-      plan:      user.publicMetadata?.plan   || 'gratuit',
-      period:    user.publicMetadata?.period || 'mensuel',
-      createdAt: user.createdAt,
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.get('/api/me', requireAuth, (req, res) => {
+  const planData = userPlans.get(req.userId) || { plan: 'gratuit', period: 'mensuel' };
+  res.json({
+    id:     req.userId,
+    email:  req.userEmail,
+    name:   req.userName || 'Utilisateur',
+    plan:   planData.plan,
+    period: planData.period,
+  });
 });
 
 // POST /api/user/plan
-app.post('/api/user/plan', requireAuth(), async (req, res) => {
-  try {
-    const { userId } = getAuth(req);
-    const { plan }   = req.body;
-    const valid = ['gratuit', 'pro', 'entreprise', 'sur-devis'];
-    if (!valid.includes(plan)) return res.status(400).json({ error: 'Plan invalide.' });
-    await clerkClient.users.updateUserMetadata(userId, { publicMetadata: { plan } });
-    res.json({ success: true, plan });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+app.post('/api/user/plan', requireAuth, (req, res) => {
+  const { plan } = req.body;
+  const valid = ['gratuit', 'pro', 'entreprise', 'sur-devis'];
+  if (!valid.includes(plan)) return res.status(400).json({ error: 'Plan invalide.' });
+  const existing = userPlans.get(req.userId) || {};
+  userPlans.set(req.userId, { ...existing, plan });
+  res.json({ success: true, plan });
 });
 
-// POST /api/stripe/checkout — crée une session Stripe Checkout
-app.post('/api/stripe/checkout', requireAuth(), async (req, res) => {
+// POST /api/stripe/checkout
+app.post('/api/stripe/checkout', requireAuth, async (req, res) => {
   try {
-    const { userId }   = getAuth(req);
     const { productId } = req.body;
     if (!PRODUCT_PLAN[productId]) return res.status(400).json({ error: 'Produit invalide.' });
 
-    // Récupère le 1er prix actif pour ce produit
     const prices = await stripe.prices.list({ product: productId, active: true, limit: 1 });
     if (!prices.data.length) return res.status(400).json({ error: 'Aucun prix trouvé pour ce produit.' });
 
-    const user  = await clerkClient.users.getUser(userId);
-    const email = user.emailAddresses[0]?.emailAddress;
     const appUrl = process.env.APP_URL || `http://localhost:${PORT}`;
 
     const session = await stripe.checkout.sessions.create({
       mode:                 'subscription',
       payment_method_types: ['card'],
       line_items:           [{ price: prices.data[0].id, quantity: 1 }],
-      customer_email:       email,
+      customer_email:       req.userEmail,
       success_url:          `${appUrl}/?payment=success&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url:           `${appUrl}/?payment=cancelled`,
-      metadata:             { userId, productId },
+      metadata:             { userId: req.userId, productId },
       locale:               'fr',
     });
 
@@ -153,8 +146,8 @@ app.post('/api/stripe/checkout', requireAuth(), async (req, res) => {
   }
 });
 
-// GET /api/stripe/session/:id — vérifie le statut d'un paiement
-app.get('/api/stripe/session/:sessionId', requireAuth(), async (req, res) => {
+// GET /api/stripe/session/:id
+app.get('/api/stripe/session/:sessionId', requireAuth, async (req, res) => {
   try {
     const session  = await stripe.checkout.sessions.retrieve(req.params.sessionId);
     const planInfo = PRODUCT_PLAN[session.metadata?.productId] || null;
