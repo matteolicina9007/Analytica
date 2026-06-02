@@ -1115,10 +1115,6 @@ function closePurchaseModal() {
 async function confirmPurchase() {
   const code = document.getElementById('purchasePartnerCode').value.trim().toUpperCase();
 
-  if (code) {
-    const match = loadPartners().find(p => p.code === code);
-    if (!match) { showNotif('Code partenaire non reconnu. Laissez le champ vide pour continuer.'); return; }
-  }
 
   if (!isAuthenticated()) {
     showNotif('Veuillez vous connecter avant de souscrire.');
