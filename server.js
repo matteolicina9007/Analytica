@@ -13,6 +13,12 @@ const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 const KINDE_DOMAIN = process.env.KINDE_DOMAIN || 'https://aelcorporation.kinde.com';
 const JWKS = createRemoteJWKSet(new URL(`${KINDE_DOMAIN}/.well-known/jwks`));
 
+// Wrapper pour capturer les erreurs dans les routes async (Express 4)
+const wrap = fn => (req, res, next) => Promise.resolve(fn(req, res, next)).catch(next);
+
+// Empêche les crashes sur promesses non gérées
+process.on('unhandledRejection', (err) => console.error('UnhandledRejection:', err));
+
 // ── IN-MEMORY PLAN STORAGE ─────────────────────────────────
 const userPlans = new Map();
 
@@ -35,7 +41,8 @@ function loadOAuth() {
 }
 
 function saveOAuth() {
-  fs.writeFileSync(OAUTH_FILE, JSON.stringify(oauthStore, null, 2));
+  try { fs.writeFileSync(OAUTH_FILE, JSON.stringify(oauthStore, null, 2)); }
+  catch (e) { console.error('saveOAuth error (filesystem may be read-only):', e.message); }
 }
 
 let oauthStore = loadOAuth();
@@ -321,7 +328,7 @@ app.post('/oauth/register-client', (req, res) => {
 });
 
 // GET /oauth/authorize — page de consentement
-app.get('/oauth/authorize', (req, res) => {
+app.get('/oauth/authorize', wrap(async (req, res) => {
   const { client_id, redirect_uri, response_type, scope, state, code_challenge, code_challenge_method } = req.query;
 
   if (response_type !== 'code') {
@@ -338,10 +345,10 @@ app.get('/oauth/authorize', (req, res) => {
   })).toString('base64url');
 
   res.send(consentPageHtml({ client, formState, scope: scope || 'mcp' }));
-});
+}));
 
 // POST /oauth/authorize — traitement du consentement
-app.post('/oauth/authorize', express.urlencoded({ extended: false }), async (req, res) => {
+app.post('/oauth/authorize', express.urlencoded({ extended: false, limit: '2mb' }), wrap(async (req, res) => {
   const { consent, form_state, kinde_token } = req.body;
 
   let params;
@@ -394,7 +401,7 @@ app.post('/oauth/authorize', express.urlencoded({ extended: false }), async (req
 
   redirectUrl.searchParams.set('code', code);
   res.redirect(redirectUrl.toString());
-});
+}));
 
 // POST /oauth/token — échange code → access_token
 app.post('/oauth/token', express.urlencoded({ extended: false }), (req, res) => {
@@ -540,7 +547,7 @@ app.post('/mcp/tools/list', requireMcpAuth, (req, res) => {
 //  API ROUTES (protégées par Kinde)
 // ══════════════════════════════════════════════════════════
 
-app.get('/api/me', requireAuth, (req, res) => {
+app.get('/api/me', requireAuth, wrap(async (req, res) => {
   const planData = userPlans.get(req.userId) || { plan: 'gratuit', period: 'mensuel' };
   res.json({
     id:     req.userId,
@@ -549,16 +556,16 @@ app.get('/api/me', requireAuth, (req, res) => {
     plan:   planData.plan,
     period: planData.period,
   });
-});
+}));
 
-app.post('/api/user/plan', requireAuth, (req, res) => {
+app.post('/api/user/plan', requireAuth, wrap(async (req, res) => {
   const { plan } = req.body;
   const valid = ['gratuit', 'pro', 'entreprise', 'sur-devis'];
   if (!valid.includes(plan)) return res.status(400).json({ error: 'Plan invalide.' });
   const existing = userPlans.get(req.userId) || {};
   userPlans.set(req.userId, { ...existing, plan });
   res.json({ success: true, plan });
-});
+}));
 
 app.post('/api/stripe/checkout', requireAuth, async (req, res) => {
   try {
@@ -604,6 +611,13 @@ app.get('/api/health', (req, res) => {
 // Fallback SPA
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// Middleware d'erreur global — empêche les crashes 500
+app.use((err, req, res, next) => {
+  console.error('Express error:', err.stack || err.message);
+  if (res.headersSent) return next(err);
+  res.status(500).json({ error: 'Erreur serveur interne', detail: err.message });
 });
 
 // ── START ──────────────────────────────────────────────────
