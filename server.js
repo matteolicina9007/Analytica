@@ -29,23 +29,30 @@ const PRODUCT_PLAN = {
   'prod_UTl7nKtP1jGmaQ': { plan: 'entreprise', period: 'annuel'  },
 };
 
-// ── OAUTH 2.0 STORAGE (JSON file for persistence) ──────────
-const OAUTH_FILE = path.join(__dirname, 'oauth_data.json');
-
-function loadOAuth() {
-  try {
-    if (fs.existsSync(OAUTH_FILE))
-      return JSON.parse(fs.readFileSync(OAUTH_FILE, 'utf8'));
-  } catch {}
-  return { clients: {}, codes: {}, access_tokens: {}, refresh_tokens: {} };
-}
+// ── OAUTH 2.0 STORAGE (in-memory — clients chargés depuis env) ─
+// Les codes et tokens sont éphémères (expiry 1h), perte OK au redémarrage.
+// Les clients sont rechargés depuis les variables d'env à chaque démarrage.
+let oauthStore = { clients: {}, codes: {}, access_tokens: {}, refresh_tokens: {} };
 
 function saveOAuth() {
-  try { fs.writeFileSync(OAUTH_FILE, JSON.stringify(oauthStore, null, 2)); }
-  catch (e) { console.error('saveOAuth error (filesystem may be read-only):', e.message); }
+  // No-op: stockage in-memory uniquement, pas de fichier (filesystem Railway éphémère)
 }
 
-let oauthStore = loadOAuth();
+// Charge le client OAuth depuis les variables d'environnement Railway
+function loadEnvClients() {
+  const clientId     = process.env.OAUTH_CLIENT_ID;
+  const clientSecret = process.env.OAUTH_CLIENT_SECRET;
+  const redirectUris = process.env.OAUTH_REDIRECT_URIS;
+  if (clientId && clientSecret && redirectUris) {
+    oauthStore.clients[clientId] = {
+      name:          process.env.OAUTH_CLIENT_NAME || 'Claude.ai',
+      redirect_uris: redirectUris.split(',').map(u => u.trim()),
+      client_secret: clientSecret,
+    };
+    console.log(`✓ Client OAuth chargé depuis env: ${clientId}`);
+  }
+}
+loadEnvClients();
 
 function genToken(prefix = '') {
   return prefix + crypto.randomBytes(32).toString('hex');
@@ -61,7 +68,7 @@ function cleanExpired() {
   }
 }
 
-setInterval(() => { cleanExpired(); saveOAuth(); }, 15 * 60 * 1000);
+setInterval(cleanExpired, 15 * 60 * 1000);
 
 // ── KINDE AUTH MIDDLEWARE ──────────────────────────────────
 async function requireAuth(req, res, next) {
