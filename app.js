@@ -1172,7 +1172,68 @@ function handleStripeReturn() {
 }
 
 // ── INTÉGRATIONS EXTERNES ──────────────────────────────────
-const INTEG_LOGOS = { notion:'📝', gsheets:'📊', airtable:'🗄️', n8n:'⚙️', slack:'💬', excel:'📈', trello:'📌', googlekeep:'🟡' };
+const INTEG_CONFIG = {
+  notion: {
+    logo: '📝', name: 'Notion',
+    desc: 'Connectez votre espace Notion via l\'Integration Token',
+    fields: [
+      { key: 'token', label: 'Integration Token', type: 'password', placeholder: 'secret_...' },
+    ],
+  },
+  gsheets: {
+    logo: '📊', name: 'Google Sheets',
+    desc: 'Accédez à vos feuilles de calcul Google via l\'API',
+    fields: [
+      { key: 'apiKey',   label: 'API Key Google',         type: 'password', placeholder: 'AIzaSy...' },
+      { key: 'sheetId',  label: 'Spreadsheet ID',         type: 'text',     placeholder: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms' },
+    ],
+  },
+  airtable: {
+    logo: '🗄️', name: 'Airtable',
+    desc: 'Connectez vos bases Airtable',
+    fields: [
+      { key: 'token',  label: 'Personal Access Token', type: 'password', placeholder: 'pat...' },
+      { key: 'baseId', label: 'Base ID',               type: 'text',     placeholder: 'appXXXXXXXXXXXXXX' },
+    ],
+  },
+  n8n: {
+    logo: '⚙️', name: 'N8N',
+    desc: 'Déclenchez vos workflows N8N depuis Archiva',
+    fields: [
+      { key: 'url',    label: 'URL de votre instance N8N', type: 'text',     placeholder: 'https://votre-n8n.app' },
+      { key: 'apiKey', label: 'API Key N8N',               type: 'password', placeholder: 'n8n_api_...' },
+    ],
+  },
+  slack: {
+    logo: '💬', name: 'Slack',
+    desc: 'Envoyez des notifications et récupérez des fichiers Slack',
+    fields: [
+      { key: 'token',   label: 'Bot Token',                     type: 'password', placeholder: 'xoxb-...' },
+      { key: 'channel', label: 'ID du canal (optionnel)',        type: 'text',     placeholder: 'C0123456789' },
+    ],
+  },
+  excel: {
+    logo: '📈', name: 'Excel / OneDrive',
+    desc: 'Accédez à vos fichiers Excel via Microsoft Graph',
+    fields: [
+      { key: 'token',    label: 'Access Token Microsoft Graph', type: 'password', placeholder: 'eyJ...' },
+      { key: 'tenantId', label: 'Tenant ID (optionnel)',        type: 'text',     placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+    ],
+  },
+  trello: {
+    logo: '📌', name: 'Trello',
+    desc: 'Importez vos tableaux et cartes Trello',
+    fields: [
+      { key: 'apiKey', label: 'API Key Trello', type: 'text',     placeholder: '32 caractères hexadécimaux' },
+      { key: 'token',  label: 'Token Trello',   type: 'password', placeholder: '64 caractères hexadécimaux' },
+    ],
+  },
+  googlekeep: {
+    logo: '🟡', name: 'Google Keep',
+    desc: 'Bientôt disponible',
+    fields: [],
+  },
+};
 
 function loadIntegrations() {
   try { return JSON.parse(localStorage.getItem('archiva_integrations') || '{}'); } catch { return {}; }
@@ -1181,7 +1242,7 @@ function saveIntegrations(obj) { localStorage.setItem('archiva_integrations', JS
 
 function renderIntegrations() {
   const integs = loadIntegrations();
-  Object.keys(INTEG_LOGOS).forEach(key => {
+  Object.keys(INTEG_CONFIG).forEach(key => {
     const dot = document.getElementById('status-' + key)?.querySelector('.integ-dot');
     const btn = document.querySelector(`#integ-${key} .integ-btn`);
     if (!dot) return;
@@ -1190,34 +1251,70 @@ function renderIntegrations() {
       if (btn && !btn.disabled) { btn.textContent = 'Déconnecter'; btn.onclick = () => disconnectInteg(key); }
     } else {
       dot.className = key === 'googlekeep' ? 'integ-dot soon' : 'integ-dot off';
+      if (btn && !btn.disabled) { btn.textContent = 'Connecter'; btn.onclick = () => openIntegModal(key); }
     }
   });
 }
 
 let currentIntegKey = '';
-function openIntegModal(key, name, desc, placeholder) {
+function openIntegModal(key) {
+  const cfg   = INTEG_CONFIG[key];
+  if (!cfg) return;
   const integs = loadIntegrations();
   currentIntegKey = key;
-  document.getElementById('integModalLogo').textContent  = INTEG_LOGOS[key] || '🔗';
-  document.getElementById('integModalTitle').textContent = 'Connecter ' + name;
-  document.getElementById('integModalDesc').textContent  = desc;
-  document.getElementById('integModalInput').placeholder = placeholder;
-  document.getElementById('integModalInput').value       = integs[key] || '';
+
+  document.getElementById('integModalLogo').textContent  = cfg.logo;
+  document.getElementById('integModalTitle').textContent = 'Connecter ' + cfg.name;
+  document.getElementById('integModalDesc').textContent  = cfg.desc;
   document.getElementById('integModalError').style.display = 'none';
-  document.getElementById('integModal').style.display   = 'flex';
-  setTimeout(() => document.getElementById('integModalInput').focus(), 80);
+
+  const saved  = integs[key] || {};
+  const fields = document.getElementById('integModalFields');
+  fields.innerHTML = cfg.fields.map(f => `
+    <div class="form-field" style="margin-bottom:1rem">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--t200);margin-bottom:.5rem">${f.label}</label>
+      <input
+        type="${f.type}"
+        class="form-input"
+        id="integ-field-${f.key}"
+        placeholder="${f.placeholder}"
+        value="${escHtml(typeof saved === 'object' ? (saved[f.key] || '') : (cfg.fields.length === 1 ? (saved || '') : ''))}"
+        autocomplete="off">
+    </div>`).join('');
+
+  document.getElementById('integModal').style.display = 'flex';
+  const first = fields.querySelector('input');
+  if (first) setTimeout(() => first.focus(), 80);
 }
+
 function closeIntegModal() { document.getElementById('integModal').style.display = 'none'; }
 
 function saveIntegration() {
-  const val = document.getElementById('integModalInput').value.trim();
-  if (!val) { document.getElementById('integModalError').textContent = 'Veuillez entrer une clé ou un token.'; document.getElementById('integModalError').style.display = 'block'; return; }
+  const cfg    = INTEG_CONFIG[currentIntegKey];
+  if (!cfg) return;
+  const errEl  = document.getElementById('integModalError');
+  errEl.style.display = 'none';
+
+  const data = {};
+  for (const f of cfg.fields) {
+    const val = document.getElementById('integ-field-' + f.key)?.value.trim() || '';
+    data[f.key] = val;
+  }
+
+  const requiredFields = cfg.fields.filter((_, i) => i === 0);
+  const firstVal = cfg.fields.length ? data[cfg.fields[0].key] : '';
+  if (cfg.fields.length && !firstVal) {
+    errEl.textContent = 'Le champ "' + cfg.fields[0].label + '" est requis.';
+    errEl.style.display = 'block';
+    return;
+  }
+
   const integs = loadIntegrations();
-  integs[currentIntegKey] = val;
+  integs[currentIntegKey] = cfg.fields.length === 1 ? firstVal : data;
   saveIntegrations(integs);
   renderIntegrations();
   closeIntegModal();
-  showNotif('✓ ' + (currentIntegKey.charAt(0).toUpperCase() + currentIntegKey.slice(1)) + ' connecté.');
+  showNotif('✓ ' + cfg.name + ' connecté.');
 }
 
 function disconnectInteg(key) {

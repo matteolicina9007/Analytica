@@ -462,7 +462,7 @@
             <div class="integ-desc">Pages, bases de données, notes</div>
           </div>
           <div class="integ-status" id="status-notion"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('notion','Notion','Entrez votre clé API Notion (Integration Token)','secret_...')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('notion')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-gsheets">
@@ -472,7 +472,7 @@
             <div class="integ-desc">Feuilles de calcul &amp; tableaux</div>
           </div>
           <div class="integ-status" id="status-gsheets"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('gsheets','Google Sheets','Entrez votre clé API Google (Service Account ou API Key)','AIza...')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('gsheets')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-airtable">
@@ -482,7 +482,7 @@
             <div class="integ-desc">Bases de données &amp; CRM</div>
           </div>
           <div class="integ-status" id="status-airtable"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('airtable','Airtable','Entrez votre Personal Access Token Airtable','pat...')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('airtable')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-n8n">
@@ -492,7 +492,7 @@
             <div class="integ-desc">Automatisations &amp; workflows</div>
           </div>
           <div class="integ-status" id="status-n8n"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('n8n','N8N','Entrez l\'URL de votre instance N8N','https://votre-n8n.app')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('n8n')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-slack">
@@ -502,7 +502,7 @@
             <div class="integ-desc">Messages &amp; fichiers partagés</div>
           </div>
           <div class="integ-status" id="status-slack"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('slack','Slack','Entrez votre Slack Bot Token','xoxb-...')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('slack')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-excel">
@@ -512,7 +512,7 @@
             <div class="integ-desc">Fichiers Microsoft Office</div>
           </div>
           <div class="integ-status" id="status-excel"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('excel','Excel / OneDrive','Entrez votre Microsoft Graph API Token','eyJ...')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('excel')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-trello">
@@ -522,7 +522,7 @@
             <div class="integ-desc">Tableaux Kanban &amp; cartes</div>
           </div>
           <div class="integ-status" id="status-trello"><span class="integ-dot off"></span></div>
-          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('trello','Trello','Entrez votre Trello API Key','...')">Connecter</button>
+          <button class="btn btn-sm btn-ghost integ-btn" onclick="openIntegModal('trello')">Connecter</button>
         </div>
 
         <div class="integ-card" id="integ-googlekeep">
@@ -590,7 +590,7 @@
 
 <!-- MODAL INTÉGRATION -->
 <div id="integModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeIntegModal()">
-  <div class="modal-box" style="max-width:460px">
+  <div class="modal-box" style="max-width:480px">
     <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:1.5rem">
       <div id="integModalLogo" style="font-size:2rem"></div>
       <div>
@@ -598,12 +598,9 @@
         <p style="font-size:.8rem;color:var(--t400);margin:0" id="integModalDesc"></p>
       </div>
     </div>
-    <div class="form-field">
-      <label id="integModalLabel">Token / Clé API</label>
-      <input type="password" class="form-input" id="integModalInput" placeholder="">
-    </div>
-    <div id="integModalError" style="display:none;font-size:.82rem;color:var(--red);margin-top:.5rem"></div>
-    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem">
+    <div id="integModalFields"></div>
+    <div id="integModalError" style="display:none;font-size:.82rem;color:var(--red);margin-bottom:.5rem"></div>
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.25rem">
       <button class="btn btn-ghost" onclick="closeIntegModal()">Annuler</button>
       <button class="btn btn-primary" onclick="saveIntegration()">Connecter</button>
     </div>
