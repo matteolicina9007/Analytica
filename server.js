@@ -180,53 +180,75 @@ function consentPageHtml({ client, formState, scope, error }) {
       <span id="userStatus">Vérification de la session…</span>
     </div>
 
-    <form method="POST" action="/oauth/authorize" id="consentForm">
-      <input type="hidden" name="form_state" value="${formState}">
-      <input type="hidden" name="kinde_token" id="kindeTokenField" value="">
-      <input type="hidden" name="consent" id="consentField" value="">
-
-      <div class="btn-row">
-        <button type="button" class="btn btn-deny" onclick="submitConsent('denied')">Refuser</button>
-        <button type="button" class="btn btn-approve" id="approveBtn" onclick="submitConsent('granted')" disabled>
-          Autoriser
-        </button>
-      </div>
-    </form>
+    <div class="btn-row">
+      <button type="button" class="btn btn-deny" onclick="submitConsent('denied')">Refuser</button>
+      <button type="button" class="btn btn-approve" id="approveBtn" onclick="submitConsent('granted')" disabled>
+        Autoriser
+      </button>
+    </div>
 
     <p class="fine">En autorisant, vous accordez à cette application l'accès décrit ci-dessus.<br>Vous pouvez révoquer cet accès à tout moment.</p>
   </div>
 
   <script>
-    const token = localStorage.getItem('kinde_access_token');
+    let kindeToken  = localStorage.getItem('kinde_access_token') || '';
     const statusEl  = document.getElementById('userStatus');
     const approveBtn = document.getElementById('approveBtn');
-    const tokenField = document.getElementById('kindeTokenField');
 
-    if (token) {
+    if (kindeToken) {
       try {
-        const parts   = token.split('.');
+        const parts   = kindeToken.split('.');
         const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
         const name    = payload.given_name || payload.email || 'Utilisateur';
         const exp     = payload.exp ? payload.exp * 1000 : 0;
         if (exp && Date.now() > exp) {
           statusEl.textContent = 'Session expirée — reconnectez-vous sur Archiva.';
+          kindeToken = '';
         } else {
           statusEl.textContent = 'Connecté en tant que ' + name;
           statusEl.style.color = '#4ade80';
           statusEl.style.fontStyle = 'normal';
-          tokenField.value = token;
           approveBtn.disabled = false;
         }
       } catch {
         statusEl.textContent = 'Session non reconnue — connectez-vous sur Archiva.';
+        kindeToken = '';
       }
     } else {
       statusEl.innerHTML = 'Non connecté — <a href="/" style="color:#f97316">connectez-vous sur Archiva</a> d\'abord.';
     }
 
-    function submitConsent(value) {
-      document.getElementById('consentField').value = value;
-      document.getElementById('consentForm').submit();
+    async function submitConsent(value) {
+      approveBtn.disabled = true;
+      const denyBtn = document.querySelector('.btn-deny');
+      if (denyBtn) denyBtn.disabled = true;
+
+      try {
+        const resp = await fetch('/oauth/authorize', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            consent:     value,
+            form_state:  \`${formState}\`,
+            kinde_token: kindeToken,
+          }),
+        });
+        const data = await resp.json();
+        if (data.redirect_url) {
+          window.location.href = data.redirect_url;
+        } else {
+          const msg = data.error || 'Erreur inconnue';
+          statusEl.textContent = '⚠️ ' + msg;
+          statusEl.style.color = '#f87171';
+          approveBtn.disabled = false;
+          if (denyBtn) denyBtn.disabled = false;
+        }
+      } catch (err) {
+        statusEl.textContent = '⚠️ Erreur réseau : ' + err.message;
+        statusEl.style.color = '#f87171';
+        approveBtn.disabled = false;
+        if (denyBtn) denyBtn.disabled = false;
+      }
     }
   </script>
 </body>
@@ -283,6 +305,7 @@ app.post('/api/stripe/webhook',
 
 // ── MIDDLEWARES ────────────────────────────────────────────
 app.use(express.json());
+app.use(express.urlencoded({ extended: false, limit: '4mb' }));
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
@@ -354,27 +377,45 @@ app.get('/oauth/authorize', wrap(async (req, res) => {
   res.send(consentPageHtml({ client, formState, scope: scope || 'mcp' }));
 }));
 
-// POST /oauth/authorize — traitement du consentement
-app.post('/oauth/authorize', express.urlencoded({ extended: false, limit: '2mb' }), wrap(async (req, res) => {
-  const { consent, form_state, kinde_token } = req.body;
+// POST /oauth/authorize — traitement du consentement (body JSON envoyé par fetch)
+app.post('/oauth/authorize', wrap(async (req, res) => {
+  console.log('[oauth/authorize POST] body keys:', Object.keys(req.body || {}));
+
+  const { consent, form_state, kinde_token } = req.body || {};
+
+  if (!form_state) {
+    console.error('[oauth/authorize POST] form_state manquant');
+    return res.status(400).json({ error: 'form_state manquant' });
+  }
 
   let params;
   try { params = JSON.parse(Buffer.from(form_state, 'base64url').toString()); }
-  catch { return res.status(400).send('Paramètres de formulaire invalides.'); }
+  catch (e) {
+    console.error('[oauth/authorize POST] décodage form_state échoué:', e.message);
+    return res.status(400).json({ error: 'Paramètres invalides' });
+  }
 
   const { client_id, redirect_uri, scope, state, code_challenge, code_challenge_method } = params;
+  console.log('[oauth/authorize POST] client_id:', client_id, '| redirect_uri:', redirect_uri);
+
   const client = oauthStore.clients[client_id];
-  if (!client || !client.redirect_uris.includes(redirect_uri)) return res.status(400).send('Requête invalide.');
+  if (!client) {
+    console.error('[oauth/authorize POST] client inconnu:', client_id, '| clients connus:', Object.keys(oauthStore.clients));
+    return res.status(400).json({ error: 'client_id inconnu — le serveur a peut-être redémarré. Reconnectez le MCP depuis Claude.ai.' });
+  }
+  if (!client.redirect_uris.includes(redirect_uri)) {
+    return res.status(400).json({ error: 'redirect_uri non autorisé' });
+  }
 
   const redirectUrl = new URL(redirect_uri);
   if (state) redirectUrl.searchParams.set('state', state);
 
   if (consent !== 'granted') {
     redirectUrl.searchParams.set('error', 'access_denied');
-    return res.redirect(redirectUrl.toString());
+    return res.json({ redirect_url: redirectUrl.toString() });
   }
 
-  // Decode Kinde token client-side (already validated in browser before form submit)
+  // Decode Kinde token (validated client-side before submission)
   let userId = null;
   if (kinde_token) {
     try {
@@ -389,14 +430,12 @@ app.post('/oauth/authorize', express.urlencoded({ extended: false, limit: '2mb' 
     } catch { /* token malformé */ }
   }
 
+  console.log('[oauth/authorize POST] userId:', userId);
+
   if (!userId) {
-    return res.send(consentPageHtml({
-      client, formState: form_state, scope,
-      error: 'Vous devez être connecté à Archiva pour autoriser cette application.',
-    }));
+    return res.status(401).json({ error: 'Connectez-vous à Archiva avant d\'autoriser.' });
   }
 
-  // Generate authorization code (10 minutes)
   const code = genToken('code_');
   oauthStore.codes[code] = {
     client_id, redirect_uri, user_id: userId,
@@ -405,10 +444,10 @@ app.post('/oauth/authorize', express.urlencoded({ extended: false, limit: '2mb' 
     code_challenge, code_challenge_method,
     used: false,
   };
-  saveOAuth();
 
   redirectUrl.searchParams.set('code', code);
-  res.redirect(redirectUrl.toString());
+  console.log('[oauth/authorize POST] ✓ code généré, redirect vers:', redirectUrl.toString());
+  res.json({ redirect_url: redirectUrl.toString() });
 }));
 
 // POST /oauth/token — échange code → access_token
