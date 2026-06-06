@@ -79,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderLibrary();
   renderPartners();
   renderIntegrations();
-  renderApiKey();
   initKinde();
   handleStripeReturn();
 });
@@ -632,6 +631,7 @@ Génère un document complet, structuré en Markdown (## H2, ### H3). Profession
 
     addToLibrary({ title: type + (company ? ' — ' + company : ''), content: result, module: 'gen' });
     document.getElementById('genOutput').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    checkAndRunInteg(instr, result, type + (company ? ' — ' + company : ''));
   } catch (err) { showError('genOutput', err.message); }
 }
 
@@ -680,6 +680,8 @@ DOCUMENT : ${text.slice(0, 12000)}`;
 
     addToLibrary({ title: mode + ' — ' + title, content: result, module: 'extract' });
     document.getElementById('extractOutput').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const extractInstr = document.getElementById('extractPasteText')?.value || '';
+    checkAndRunInteg(extractInstr, result, mode + ' — ' + title);
   } catch (err) { showError('extractOutput', err.message); }
 }
 
@@ -730,6 +732,7 @@ Puis à la toute fin, données graphiques JSON délimitées exactement ainsi :
     if (chartMatch) { try { renderCharts(JSON.parse(chartMatch[1].trim()).charts || []); } catch {} }
     addToLibrary({ title: type, content: reportText, module: 'analysis' });
     document.getElementById('analysisOutput').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    checkAndRunInteg(context, reportText, type);
   } catch (err) { showError('analysisOutput', err.message); }
 }
 
@@ -1177,39 +1180,41 @@ const INTEG_CONFIG = {
     logo: '📝', name: 'Notion',
     desc: 'Connectez votre espace Notion via l\'Integration Token',
     fields: [
-      { key: 'token', label: 'Integration Token', type: 'password', placeholder: 'secret_...' },
+      { key: 'token',      label: 'Integration Token',          type: 'password', placeholder: 'secret_...' },
+      { key: 'databaseId', label: 'Database ID (optionnel)',    type: 'text',     placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
     ],
   },
   gsheets: {
     logo: '📊', name: 'Google Sheets',
     desc: 'Accédez à vos feuilles de calcul Google via l\'API',
     fields: [
-      { key: 'apiKey',   label: 'API Key Google',         type: 'password', placeholder: 'AIzaSy...' },
-      { key: 'sheetId',  label: 'Spreadsheet ID',         type: 'text',     placeholder: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms' },
+      { key: 'apiKey',  label: 'API Key Google',  type: 'password', placeholder: 'AIzaSy...' },
+      { key: 'sheetId', label: 'Spreadsheet ID',  type: 'text',     placeholder: '1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms' },
     ],
   },
   airtable: {
     logo: '🗄️', name: 'Airtable',
     desc: 'Connectez vos bases Airtable',
     fields: [
-      { key: 'token',  label: 'Personal Access Token', type: 'password', placeholder: 'pat...' },
-      { key: 'baseId', label: 'Base ID',               type: 'text',     placeholder: 'appXXXXXXXXXXXXXX' },
+      { key: 'token',     label: 'Personal Access Token', type: 'password', placeholder: 'pat...' },
+      { key: 'baseId',    label: 'Base ID',               type: 'text',     placeholder: 'appXXXXXXXXXXXXXX' },
+      { key: 'tableName', label: 'Nom de la table',       type: 'text',     placeholder: 'Documents' },
     ],
   },
   n8n: {
     logo: '⚙️', name: 'N8N',
     desc: 'Déclenchez vos workflows N8N depuis Archiva',
     fields: [
-      { key: 'url',    label: 'URL de votre instance N8N', type: 'text',     placeholder: 'https://votre-n8n.app' },
-      { key: 'apiKey', label: 'API Key N8N',               type: 'password', placeholder: 'n8n_api_...' },
+      { key: 'url',    label: 'URL webhook N8N',  type: 'text',     placeholder: 'https://votre-n8n.app/webhook/...' },
+      { key: 'apiKey', label: 'API Key N8N',      type: 'password', placeholder: 'n8n_api_...' },
     ],
   },
   slack: {
     logo: '💬', name: 'Slack',
-    desc: 'Envoyez des notifications et récupérez des fichiers Slack',
+    desc: 'Envoyez des notifications et fichiers vers Slack',
     fields: [
-      { key: 'token',   label: 'Bot Token',                     type: 'password', placeholder: 'xoxb-...' },
-      { key: 'channel', label: 'ID du canal (optionnel)',        type: 'text',     placeholder: 'C0123456789' },
+      { key: 'token',   label: 'Bot Token',              type: 'password', placeholder: 'xoxb-...' },
+      { key: 'channel', label: 'ID du canal',            type: 'text',     placeholder: 'C0123456789' },
     ],
   },
   excel: {
@@ -1217,7 +1222,7 @@ const INTEG_CONFIG = {
     desc: 'Accédez à vos fichiers Excel via Microsoft Graph',
     fields: [
       { key: 'token',    label: 'Access Token Microsoft Graph', type: 'password', placeholder: 'eyJ...' },
-      { key: 'tenantId', label: 'Tenant ID (optionnel)',        type: 'text',     placeholder: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx' },
+      { key: 'tenantId', label: 'Tenant ID (optionnel)',        type: 'text',     placeholder: 'xxxxxxxx-xxxx-...' },
     ],
   },
   trello: {
@@ -1226,6 +1231,7 @@ const INTEG_CONFIG = {
     fields: [
       { key: 'apiKey', label: 'API Key Trello', type: 'text',     placeholder: '32 caractères hexadécimaux' },
       { key: 'token',  label: 'Token Trello',   type: 'password', placeholder: '64 caractères hexadécimaux' },
+      { key: 'listId', label: 'ID de la liste', type: 'text',     placeholder: 'xxxxxxxxxxxxxxxxxxxxxxxx' },
     ],
   },
   googlekeep: {
@@ -1325,69 +1331,81 @@ function disconnectInteg(key) {
   showNotif('Intégration déconnectée.');
 }
 
-// ── CLÉ API ARCHIVA ─────────────────────────────────────────
-function generateApiKey() {
-  const arr = new Uint8Array(32);
-  crypto.getRandomValues(arr);
-  const key = 'arch_' + Array.from(arr).map(b => b.toString(16).padStart(2,'0')).join('');
-  localStorage.setItem('archiva_api_key', key);
-  renderApiKey();
-  showNotif('✓ Clé API générée. Gardez-la secrète !');
+// ── DÉTECTION ET EXÉCUTION AUTOMATIQUE DES INTÉGRATIONS ────
+const INTEG_KEYWORDS = {
+  notion:   ['notion'],
+  gsheets:  ['google sheets', 'google sheet', 'sheets', 'spreadsheet', 'tableur'],
+  airtable: ['airtable'],
+  n8n:      ['n8n'],
+  slack:    ['slack'],
+  excel:    ['excel', 'onedrive'],
+  trello:   ['trello'],
+};
+
+function detectIntegCommands(text) {
+  const lower = text.toLowerCase();
+  return Object.entries(INTEG_KEYWORDS)
+    .filter(([, kws]) => kws.some(kw => lower.includes(kw)))
+    .map(([key]) => key);
 }
 
-function renderApiKey() {
-  const key  = localStorage.getItem('archiva_api_key');
-  const dot  = document.getElementById('apikeyStatusDot');
-  const txt  = document.getElementById('apikeyStatusText');
-  const disp = document.getElementById('apikeyDisplay');
-  const inp  = document.getElementById('apikeyValue');
-  const gen  = document.getElementById('apikeyGenBtn');
-  const rev  = document.getElementById('apikeyRevokeBtn');
-  if (!dot) return;
-  if (key) {
-    dot.className = 'integ-dot on';
-    txt.textContent = 'Clé active — copiez-la et gardez-la secrète';
-    txt.style.color = '#4ade80';
-    disp.style.display = 'flex';
-    inp.value = '•'.repeat(key.length);
-    inp.dataset.real = key;
-    inp.dataset.hidden = '1';
-    if (gen) gen.textContent = '↺ Régénérer';
-    if (rev) rev.style.display = 'inline-flex';
-  } else {
-    dot.className = 'integ-dot off';
-    txt.textContent = 'Aucune clé générée';
-    txt.style.color = '';
-    disp.style.display = 'none';
-    if (gen) gen.textContent = '✦ Générer ma clé API';
-    if (rev) rev.style.display = 'none';
+async function executeIntegration(toolKey, title, content) {
+  const integs = loadIntegrations();
+  const creds  = integs[toolKey];
+  if (!creds) {
+    showNotif(`⚠️ ${INTEG_CONFIG[toolKey]?.name || toolKey} n'est pas connecté dans les intégrations.`);
+    return;
+  }
+
+  const toolName = INTEG_CONFIG[toolKey]?.name || toolKey;
+  showNotif(`⏳ Export vers ${toolName}…`);
+
+  const body = { title, content };
+  if (typeof creds === 'string') { body.token = creds; }
+  else { Object.assign(body, creds); }
+
+  try {
+    const res  = await fetch(`/api/integ/${toolKey}`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body:    JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      const link = data.url
+        ? ` <a href="${data.url}" target="_blank" rel="noopener" style="color:var(--orange);text-decoration:underline">Ouvrir →</a>`
+        : '';
+      showNotifHtml(`✓ Exporté dans ${toolName} !${link}`);
+    } else {
+      showNotif(`✗ ${toolName} : ${data.error || 'Erreur inconnue'}`);
+    }
+  } catch (err) {
+    showNotif(`✗ Erreur réseau vers ${toolName} : ${err.message}`);
   }
 }
 
-function toggleApiKeyVisibility() {
-  const inp = document.getElementById('apikeyValue');
-  if (!inp) return;
-  if (inp.dataset.hidden === '1') {
-    inp.value = inp.dataset.real;
-    inp.dataset.hidden = '0';
-  } else {
-    inp.value = '•'.repeat(inp.dataset.real.length);
-    inp.dataset.hidden = '1';
+function showNotifHtml(html) {
+  let notif = document.getElementById('globalNotif');
+  if (!notif) {
+    notif = document.createElement('div');
+    notif.id = 'globalNotif';
+    notif.style.cssText = 'position:fixed;top:80px;right:1.25rem;z-index:3000;background:rgba(11,22,40,.97);border:1px solid rgba(249,115,22,.3);color:var(--t100);font-size:.85rem;font-weight:500;padding:.7rem 1.25rem;border-radius:10px;box-shadow:0 8px 32px rgba(0,0,0,.5);backdrop-filter:blur(12px);transition:opacity .3s ease;max-width:360px;line-height:1.55';
+    document.body.appendChild(notif);
+  }
+  notif.innerHTML = html;
+  notif.style.opacity = '1';
+  clearTimeout(_notifTimeout);
+  _notifTimeout = setTimeout(() => { notif.style.opacity = '0'; }, 6000);
+}
+
+async function checkAndRunInteg(instructions, content, title) {
+  if (!instructions) return;
+  const tools = detectIntegCommands(instructions);
+  for (const tool of tools) {
+    await executeIntegration(tool, title, content);
   }
 }
 
-function copyApiKey() {
-  const key = localStorage.getItem('archiva_api_key');
-  if (!key) return;
-  navigator.clipboard.writeText(key).then(() => showNotif('✓ Clé copiée dans le presse-papiers.'));
-}
-
-function revokeApiKey() {
-  if (!confirm('Révoquer la clé API ? Les connexions actives seront interrompues.')) return;
-  localStorage.removeItem('archiva_api_key');
-  renderApiKey();
-  showNotif('Clé API révoquée.');
-}
 
 // ── CONTACT ────────────────────────────────────────────────
 function submitContact() {

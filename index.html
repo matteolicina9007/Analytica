@@ -538,52 +538,6 @@
       </div>
     </div>
 
-    <!-- ══ CLÉ API ARCHIVA ══ -->
-    <div class="api-key-section">
-      <div class="sec-label" style="margin-bottom:1rem"><span class="dot"></span>Accès développeur</div>
-      <h2 style="font-size:1.3rem;margin:0 0 .4rem">Clé API <span class="gradient-text">Archiva</span></h2>
-      <p style="font-size:.875rem;color:var(--t400);margin:0 0 1.75rem">Connectez Archiva à N8N, Make, Claude ou tout autre outil compatible REST API. Gratuit, instantané.</p>
-
-      <div class="apikey-box">
-        <div class="apikey-info">
-          <div class="apikey-status-row">
-            <span id="apikeyStatusDot" class="integ-dot off"></span>
-            <span id="apikeyStatusText" style="font-size:.82rem;color:var(--t400)">Aucune clé générée</span>
-          </div>
-          <div class="apikey-display" id="apikeyDisplay" style="display:none">
-            <input type="text" class="form-input apikey-input" id="apikeyValue" readonly>
-            <button class="btn btn-sm btn-ghost" onclick="copyApiKey()">📋 Copier</button>
-            <button class="btn btn-sm btn-ghost" onclick="toggleApiKeyVisibility()">👁️</button>
-          </div>
-        </div>
-        <div class="apikey-actions">
-          <button class="btn btn-primary" id="apikeyGenBtn" onclick="generateApiKey()">
-            ✦ Générer ma clé API
-          </button>
-          <button class="btn btn-ghost" id="apikeyRevokeBtn" style="display:none;color:var(--red)" onclick="revokeApiKey()">
-            Révoquer
-          </button>
-        </div>
-      </div>
-
-      <div class="apikey-usage">
-        <div class="apikey-usage-title">Comment utiliser votre clé</div>
-        <div class="apikey-usage-grid">
-          <div class="apikey-usage-card">
-            <div class="apikey-usage-ico">⚙️</div>
-            <div><strong>N8N</strong><br><span>HTTP Request → Header : <code>Authorization: Bearer VOTRE_CLÉ</code></span></div>
-          </div>
-          <div class="apikey-usage-card">
-            <div class="apikey-usage-ico">🤖</div>
-            <div><strong>Claude / Make</strong><br><span>Connecteur HTTP → API Key dans les headers</span></div>
-          </div>
-          <div class="apikey-usage-card">
-            <div class="apikey-usage-ico">💻</div>
-            <div><strong>Code</strong><br><span><code>fetch('/api/me', &#123; headers: &#123; Authorization: 'Bearer CLÉ' &#125; &#125;)</code></span></div>
-          </div>
-        </div>
-      </div>
-    </div>
 
   </div>
 </div><!-- /page-ai -->
