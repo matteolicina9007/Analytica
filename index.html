@@ -284,6 +284,28 @@
       </div>
     </div>
 
+    <!-- MODÈLES DE DOCUMENTS -->
+    <div class="doc-lib-wrap" id="templatesWrap" style="margin-top:.75rem">
+      <div class="doc-lib-header" onclick="toggleTemplates()">
+        <div class="doc-lib-title">
+          📋 Modèles de documents
+          <span class="doc-lib-count" id="templatesCount">0</span>
+          <span style="font-size:.72rem;font-weight:400;color:var(--t500);margin-left:.5rem">— referencez-les dans vos instructions</span>
+        </div>
+        <span class="doc-lib-toggle" id="templatesToggle">▼</span>
+      </div>
+      <div class="doc-lib-body" id="templatesBody">
+        <p style="font-size:.8rem;color:var(--t400);margin:0 0 1rem;line-height:1.55">
+          Sauvegardez des documents types. Mentionnez leur nom dans vos instructions pour que l'IA les utilise comme modèle de format.
+          <br><em style="color:var(--orange)">Exemple : "rédige un contrat sous la forme du modèle Contrat Standard"</em>
+        </p>
+        <div id="templatesList" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem"></div>
+        <button class="btn btn-sm btn-ghost" onclick="openTemplateModal()" style="gap:.4rem">
+          ➕ Ajouter un modèle
+        </button>
+      </div>
+    </div>
+
     <!-- CARTE CLÉ API -->
     <div class="api-card" id="apiCard">
       <div class="api-top-row">
@@ -541,6 +563,57 @@
 
   </div>
 </div><!-- /page-ai -->
+
+<!-- MODAL MODÈLES DE DOCUMENTS -->
+<div id="templateModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeTemplateModal()">
+  <div class="modal-box" style="max-width:520px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.5rem">
+      <div>
+        <h3 style="margin:0 0 .2rem">📋 Nouveau modèle</h3>
+        <p style="font-size:.8rem;color:var(--t400);margin:0">Ce document servira de référence de format pour l'IA</p>
+      </div>
+      <button onclick="closeTemplateModal()" style="background:none;border:none;color:var(--t400);font-size:1.2rem;cursor:pointer;padding:.25rem">✕</button>
+    </div>
+
+    <div class="form-field" style="margin-bottom:1.25rem">
+      <label style="display:block;font-size:.82rem;font-weight:600;color:var(--t200);margin-bottom:.5rem">
+        Nom du modèle <span style="color:var(--orange)">*</span>
+      </label>
+      <input type="text" class="form-input" id="templateNameInput"
+        placeholder="Ex : Contrat Standard, Rapport Mensuel, Devis Client…"
+        onkeydown="if(event.key==='Enter')document.getElementById('ttab-paste').click()">
+      <p style="font-size:.74rem;color:var(--t500);margin:.4rem 0 0">C'est ce nom que vous écrirez dans vos instructions pour y faire référence.</p>
+    </div>
+
+    <div class="data-tabs" style="margin-bottom:1rem">
+      <button class="dtab active" id="ttab-file" onclick="switchTemplateTab('file')">📁 Fichier</button>
+      <button class="dtab" id="ttab-paste" onclick="switchTemplateTab('paste')">📋 Coller du texte</button>
+    </div>
+
+    <div id="ttab-content-file">
+      <div class="upload-zone" style="padding:1.25rem" onclick="document.getElementById('templateFileInput').click()"
+        ondragover="event.preventDefault()" ondrop="handleTemplateFileDrop(event)">
+        <div class="uz-icon" style="font-size:1.75rem">📂</div>
+        <p class="uz-main">Glissez votre fichier ou cliquez</p>
+        <p class="uz-formats">PDF · DOCX · TXT · CSV</p>
+      </div>
+      <input type="file" id="templateFileInput" accept=".pdf,.docx,.txt,.csv" style="display:none" onchange="handleTemplateFile(event)">
+      <div id="templateFilePreview" style="font-size:.82rem;color:var(--t400);margin-top:.5rem;min-height:1.2rem"></div>
+    </div>
+
+    <div id="ttab-content-paste" style="display:none">
+      <textarea class="form-textarea" id="templatePasteText" rows="7"
+        placeholder="Collez ici le contenu du document à utiliser comme modèle de format…"></textarea>
+    </div>
+
+    <div id="templateModalError" style="display:none;font-size:.82rem;color:var(--red);margin-top:.75rem"></div>
+
+    <div style="display:flex;gap:.75rem;justify-content:flex-end;margin-top:1.5rem">
+      <button class="btn btn-ghost" onclick="closeTemplateModal()">Annuler</button>
+      <button class="btn btn-primary" onclick="saveTemplate()" id="saveTemplateBtn">✓ Enregistrer le modèle</button>
+    </div>
+  </div>
+</div>
 
 <!-- MODAL INTÉGRATION -->
 <div id="integModal" class="modal-overlay" style="display:none" onclick="if(event.target===this)closeIntegModal()">

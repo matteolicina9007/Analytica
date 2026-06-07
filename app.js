@@ -77,6 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   renderLibrary();
+  renderTemplates();
   renderPartners();
   renderIntegrations();
   initKinde();
@@ -614,10 +615,11 @@ async function generateDoc() {
 
   showLoading('genOutput', ['Analyse de la demande', 'Structuration', 'Rédaction IA', 'Mise en forme']);
 
+  const templateCtx = buildTemplateContext(instr);
   const prompt = `Tu es un expert en rédaction professionnelle. Génère un(e) ${type} en ${lang}.
 Contexte : ${company || 'Non précisé'} | Longueur : ${length}
-Instructions : ${instr || 'Document standard professionnel'}
-Génère un document complet, structuré en Markdown (## H2, ### H3). Professionnel et complet.`;
+Instructions : ${instr || 'Document standard professionnel'}${templateCtx}
+Génère un document complet, structuré en Markdown (## H2, ### H3). Professionnel et complet.${templateCtx ? '\nRespecte strictement la structure et le style du/des modèle(s) de référence fourni(s).' : ''}`;
 
   try {
     advanceStep(1); setTimeout(() => advanceStep(2), 800);
@@ -667,8 +669,10 @@ async function runExtraction() {
     showLoading('extractOutput', ['Analyse', 'Extraction', 'Résumé']);
   }
 
+  const extractInstrText = document.getElementById('extractPasteText')?.value || '';
+  const extractTemplateCtx = buildTemplateContext(extractInstrText);
   const prompt = `Expert en analyse documentaire. Effectue une ${mode} du document suivant.
-Réponds en Markdown structuré (##, listes, données en **gras**).
+Réponds en Markdown structuré (##, listes, données en **gras**).${extractTemplateCtx}
 DOCUMENT : ${text.slice(0, 12000)}`;
 
   try {
@@ -680,8 +684,7 @@ DOCUMENT : ${text.slice(0, 12000)}`;
 
     addToLibrary({ title: mode + ' — ' + title, content: result, module: 'extract' });
     document.getElementById('extractOutput').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    const extractInstr = document.getElementById('extractPasteText')?.value || '';
-    checkAndRunInteg(extractInstr, result, mode + ' — ' + title);
+    checkAndRunInteg(extractInstrText, result, mode + ' — ' + title);
   } catch (err) { showError('extractOutput', err.message); }
 }
 
@@ -704,11 +707,12 @@ async function runAnalysis() {
   } catch (err) { showError('analysisOutput', 'Erreur de lecture : ' + err.message); return; }
 
   advanceStep(1);
+  const analysisTemplateCtx = buildTemplateContext(context);
   const prompt = `Expert analyste de données. Réalise une ${type}.
-Contexte : ${context || 'Analyse générale'}
+Contexte : ${context || 'Analyse générale'}${analysisTemplateCtx}
 DONNÉES : ${dataText.slice(0, 12000)}
 
-Rapport Markdown avec : ## Synthèse, ## Analyse, ## Données clés (tableau), ## Tendances, ## Recommandations
+Rapport Markdown avec : ## Synthèse, ## Analyse, ## Données clés (tableau), ## Tendances, ## Recommandations${analysisTemplateCtx ? '\nRespecte la structure du/des modèle(s) de référence fourni(s).' : ''}
 
 Puis à la toute fin, données graphiques JSON délimitées exactement ainsi :
 \`\`\`chartdata
@@ -1406,6 +1410,148 @@ async function checkAndRunInteg(instructions, content, title) {
   }
 }
 
+// ── MODÈLES DE DOCUMENTS ───────────────────────────────────
+function loadTemplates() {
+  try { return JSON.parse(localStorage.getItem('archiva_templates') || '[]'); }
+  catch { return []; }
+}
+function saveTemplatesStore(arr) {
+  localStorage.setItem('archiva_templates', JSON.stringify(arr));
+}
+
+function renderTemplates() {
+  const templates = loadTemplates();
+  const count = document.getElementById('templatesCount');
+  if (count) count.textContent = templates.length;
+  const list = document.getElementById('templatesList');
+  if (!list) return;
+  if (!templates.length) {
+    list.innerHTML = '<p style="font-size:.8rem;color:var(--t500);margin:0">Aucun modèle enregistré.</p>';
+    return;
+  }
+  list.innerHTML = templates.map(t => `
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:1px solid var(--border);border-radius:.5rem;padding:.6rem .85rem;gap:.75rem">
+      <div style="min-width:0">
+        <div style="font-size:.85rem;font-weight:600;color:var(--t100);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escHtml(t.name)}</div>
+        <div style="font-size:.74rem;color:var(--t500);margin-top:.15rem">${t.date} · ${t.content.length} caractères</div>
+      </div>
+      <button onclick="deleteTemplate(${t.id})" style="background:none;border:none;color:var(--t400);font-size:1rem;cursor:pointer;flex-shrink:0;padding:.25rem" title="Supprimer">🗑</button>
+    </div>`).join('');
+}
+
+function toggleTemplates() {
+  const body    = document.getElementById('templatesBody');
+  const toggle  = document.getElementById('templatesToggle');
+  const isOpen  = body.style.display !== 'none';
+  body.style.display  = isOpen ? 'none' : '';
+  toggle.textContent  = isOpen ? '▶' : '▼';
+}
+
+// current file content stored while modal is open
+let _templateFileContent = '';
+
+function openTemplateModal() {
+  _templateFileContent = '';
+  document.getElementById('templateNameInput').value  = '';
+  document.getElementById('templatePasteText').value  = '';
+  document.getElementById('templateFilePreview').textContent = '';
+  document.getElementById('templateModalError').style.display = 'none';
+  switchTemplateTab('file');
+  document.getElementById('templateModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('templateNameInput').focus(), 80);
+}
+
+function closeTemplateModal() {
+  document.getElementById('templateModal').style.display = 'none';
+}
+
+function switchTemplateTab(tab) {
+  document.getElementById('ttab-file').classList.toggle('active', tab === 'file');
+  document.getElementById('ttab-paste').classList.toggle('active', tab === 'paste');
+  document.getElementById('ttab-content-file').style.display  = tab === 'file'  ? '' : 'none';
+  document.getElementById('ttab-content-paste').style.display = tab === 'paste' ? '' : 'none';
+}
+
+async function handleTemplateFile(event) {
+  const file = event.target.files?.[0];
+  if (!file) return;
+  document.getElementById('templateFilePreview').textContent = `Lecture de "${file.name}"…`;
+  try {
+    _templateFileContent = await readFileText(file);
+    document.getElementById('templateFilePreview').textContent = `✓ "${file.name}" — ${_templateFileContent.length} caractères`;
+  } catch (err) {
+    document.getElementById('templateFilePreview').textContent = `✗ Erreur : ${err.message}`;
+    _templateFileContent = '';
+  }
+}
+
+async function handleTemplateFileDrop(event) {
+  event.preventDefault();
+  const file = event.dataTransfer.files?.[0];
+  if (!file) return;
+  document.getElementById('templateFilePreview').textContent = `Lecture de "${file.name}"…`;
+  try {
+    _templateFileContent = await readFileText(file);
+    document.getElementById('templateFilePreview').textContent = `✓ "${file.name}" — ${_templateFileContent.length} caractères`;
+  } catch (err) {
+    document.getElementById('templateFilePreview').textContent = `✗ Erreur : ${err.message}`;
+    _templateFileContent = '';
+  }
+}
+
+function saveTemplate() {
+  const name = document.getElementById('templateNameInput').value.trim();
+  const errEl = document.getElementById('templateModalError');
+  errEl.style.display = 'none';
+
+  if (!name) { errEl.textContent = 'Veuillez donner un nom au modèle.'; errEl.style.display = 'block'; return; }
+
+  const activeTab = document.getElementById('ttab-paste').classList.contains('active') ? 'paste' : 'file';
+  let content = '';
+  if (activeTab === 'paste') {
+    content = document.getElementById('templatePasteText').value.trim();
+    if (!content) { errEl.textContent = 'Veuillez coller du texte.'; errEl.style.display = 'block'; return; }
+  } else {
+    content = _templateFileContent;
+    if (!content) { errEl.textContent = 'Veuillez importer un fichier.'; errEl.style.display = 'block'; return; }
+  }
+
+  const templates = loadTemplates();
+  if (templates.find(t => t.name.toLowerCase() === name.toLowerCase())) {
+    errEl.textContent = `Un modèle nommé "${name}" existe déjà.`;
+    errEl.style.display = 'block';
+    return;
+  }
+
+  templates.unshift({
+    id:      Date.now(),
+    name,
+    content: content.slice(0, 50000),
+    date:    new Date().toLocaleDateString('fr-FR'),
+  });
+  saveTemplatesStore(templates);
+  renderTemplates();
+  closeTemplateModal();
+  showNotif(`✓ Modèle "${name}" enregistré.`);
+}
+
+function deleteTemplate(id) {
+  const templates = loadTemplates().filter(t => t.id !== id);
+  saveTemplatesStore(templates);
+  renderTemplates();
+}
+
+function buildTemplateContext(instructionText) {
+  if (!instructionText) return '';
+  const templates = loadTemplates();
+  if (!templates.length) return '';
+  const lower = instructionText.toLowerCase();
+  const matched = templates.filter(t => lower.includes(t.name.toLowerCase()));
+  if (!matched.length) return '';
+  return matched.map(t =>
+    `\n\n--- MODÈLE DE RÉFÉRENCE : "${t.name}" ---\n${t.content.slice(0, 8000)}\n--- FIN DU MODÈLE ---`
+  ).join('');
+}
 
 // ── CONTACT ────────────────────────────────────────────────
 function submitContact() {
