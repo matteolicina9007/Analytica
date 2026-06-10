@@ -380,9 +380,10 @@ function toggleDocLib() {
 }
 
 function renderLibrary() {
-  const lib   = loadLibrary();
-  const grid  = document.getElementById('docGrid');
-  const count = document.getElementById('docLibCount');
+  const allLib = loadLibrary();
+  const lib    = allLib.filter(d => ['gen','extract','analysis'].includes(d.module));
+  const grid   = document.getElementById('docGrid');
+  const count  = document.getElementById('docLibCount');
   if (!grid) return;
   count.textContent = lib.length;
 
@@ -1639,6 +1640,57 @@ async function checkTriggers() {
     } catch (err) { showNotif(`✗ Déclencheur "${t.name}" : ${err.message}`); }
   }
   if (changed) saveTriggersStore(triggers);
+}
+
+async function createTriggerFromChat() {
+  if (!checkConnection()) return;
+  const input = document.getElementById('triggerChatInput');
+  const text  = input?.value.trim();
+  if (!text) return;
+
+  const btn = document.querySelector('#triggersBody button[onclick="createTriggerFromChat()"]');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳'; }
+
+  try {
+    const parsePrompt = `Analyse cette description de workflow et extrais les paramètres sous forme de JSON strict.
+Description : "${text}"
+
+Réponds UNIQUEMENT avec un JSON valide, sans texte autour, au format exact :
+{"name":"nom court du déclencheur","freq":"daily|weekly|monthly","time":"HH:MM","weekday":1,"day":1,"action":"description complète de l'action à exécuter"}
+
+Règles :
+- freq: "daily" si quotidien, "weekly" si hebdomadaire, "monthly" si mensuel
+- time: heure au format 24h (défaut "08:00")
+- weekday: jour de semaine 0-6 (0=dimanche, 1=lundi) — pertinent si freq=weekly
+- day: jour du mois 1-28 — pertinent si freq=monthly
+- action: reprend fidèlement l'action demandée en français`;
+
+    const result = await callAI(parsePrompt, 300);
+    const jsonMatch = result.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('Format non reconnu');
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    const triggers = loadTriggers();
+    triggers.unshift({
+      id:      Date.now(),
+      name:    parsed.name    || text.slice(0, 50),
+      action:  parsed.action  || text,
+      freq:    ['daily','weekly','monthly'].includes(parsed.freq) ? parsed.freq : 'daily',
+      time:    /^\d{2}:\d{2}$/.test(parsed.time) ? parsed.time : '08:00',
+      weekday: parseInt(parsed.weekday) || 1,
+      day:     parseInt(parsed.day)     || 1,
+      enabled: true,
+      lastRun: null,
+    });
+    saveTriggersStore(triggers);
+    renderTriggers();
+    input.value = '';
+    showNotif(`⚡ Déclencheur "${parsed.name || 'Nouveau'}" créé.`);
+  } catch (err) {
+    showNotif('✗ Impossible de créer le déclencheur : ' + err.message);
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = '⚡'; }
+  }
 }
 
 // ── CONTACT ────────────────────────────────────────────────

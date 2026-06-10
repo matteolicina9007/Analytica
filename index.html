@@ -302,7 +302,10 @@
           <span class="doc-lib-count" id="templatesCount">0</span>
           <span style="font-size:.72rem;font-weight:400;color:var(--t500);margin-left:.5rem">— referencez-les dans vos instructions</span>
         </div>
-        <span class="doc-lib-toggle" id="templatesToggle">▼</span>
+        <div style="display:flex;align-items:center;gap:.5rem">
+          <button onclick="event.stopPropagation();openTemplateModal()" style="background:rgba(249,115,22,.15);border:1px solid rgba(249,115,22,.3);color:var(--orange);border-radius:.4rem;padding:.2rem .55rem;font-size:.8rem;cursor:pointer;line-height:1" title="Ajouter un modèle">➕</button>
+          <span class="doc-lib-toggle" id="templatesToggle">▼</span>
+        </div>
       </div>
       <div class="doc-lib-body" id="templatesBody">
         <p style="font-size:.8rem;color:var(--t400);margin:0 0 1rem;line-height:1.55">
@@ -327,12 +330,18 @@
         <span class="doc-lib-toggle" id="triggersToggle">▼</span>
       </div>
       <div class="doc-lib-body" id="triggersBody">
-        <p style="font-size:.8rem;color:var(--t400);margin:0 0 1rem;line-height:1.55">
-          Créez des règles automatiques. Archiva les exécutera à l'heure prévue à votre prochaine connexion.
-          <br><em style="color:var(--orange)">Exemples : "Tous les matins à 8h, récapitulatif des emails" · "Le 1er du mois, rapport financier"</em>
+        <div id="triggersList" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
+        <p style="font-size:.8rem;color:var(--t400);margin:0 0 .65rem;line-height:1.5">
+          💬 Décrivez votre workflow en langage naturel — l'IA créera la règle automatiquement.
         </p>
-        <div id="triggersList" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem"></div>
-        <button class="btn btn-sm btn-ghost" onclick="openTriggerModal()">⚡ Créer un déclencheur</button>
+        <div style="display:flex;gap:.55rem;align-items:flex-end">
+          <textarea id="triggerChatInput" class="form-textarea" rows="2"
+            placeholder="Ex : Tous les matins à 8h, génère un récapitulatif de mes emails et envoie-le sur Slack…"
+            style="flex:1;resize:none;min-height:48px;font-size:.83rem"
+            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();createTriggerFromChat()}"></textarea>
+          <button class="btn btn-primary" onclick="createTriggerFromChat()" style="height:48px;padding:0 .9rem;flex-shrink:0" title="Créer le déclencheur">⚡</button>
+        </div>
+        <p style="font-size:.72rem;color:var(--t500);margin:.35rem 0 0">Shift+Entrée pour aller à la ligne · Entrée pour créer</p>
       </div>
     </div>
 
