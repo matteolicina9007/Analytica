@@ -1358,6 +1358,7 @@ Réponds en français. Si l'utilisateur demande une génération de document, g�
       addToLibrary({ title: 'Chat — ' + text.slice(0, 60), content: result, module: 'chat' });
     }
     await checkAndRunInteg(text, result, 'Chat — ' + text.slice(0, 60));
+    if (isTriggerRequest(text)) await createTriggerFromDescription(text);
   } catch (err) {
     const errMsg = { role: 'assistant', content: `Désolé, une erreur s'est produite : ${err.message}` };
     chatMessages.push(errMsg);
@@ -1640,6 +1641,60 @@ async function checkTriggers() {
     } catch (err) { showNotif(`✗ Déclencheur "${t.name}" : ${err.message}`); }
   }
   if (changed) saveTriggersStore(triggers);
+}
+
+function isTriggerRequest(text) {
+  const lower = text.toLowerCase();
+  const patterns = [
+    'tous les matins', 'chaque matin', 'chaque jour', 'tous les jours',
+    'chaque semaine', 'tous les lundis', 'tous les mardis', 'tous les mercredis',
+    'tous les jeudis', 'tous les vendredis', 'chaque lundi', 'chaque vendredi',
+    'le 1er du mois', 'chaque mois', 'tous les mois', 'le premier du mois',
+    'automatiquement', 'automatise', 'planifie', 'programme', 'déclenche',
+    'chaque semaine à', 'à 8h', 'à 9h', 'à 7h', 'chaque nuit',
+  ];
+  return patterns.some(p => lower.includes(p));
+}
+
+async function createTriggerFromDescription(text) {
+  try {
+    const parsePrompt = `Analyse cette description de workflow et extrais les paramètres sous forme de JSON strict.
+Description : "${text}"
+
+Réponds UNIQUEMENT avec un JSON valide, sans texte autour, au format exact :
+{"name":"nom court du déclencheur","freq":"daily|weekly|monthly","time":"HH:MM","weekday":1,"day":1,"action":"description complète de l'action à exécuter"}
+
+Règles :
+- freq: "daily" si quotidien, "weekly" si hebdomadaire, "monthly" si mensuel
+- time: heure au format 24h (défaut "08:00")
+- weekday: jour de semaine 0-6 (0=dimanche, 1=lundi)
+- day: jour du mois 1-28
+- action: reprend fidèlement l'action demandée en français`;
+
+    const result  = await callAI(parsePrompt, 300);
+    const jsonMatch = result.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) return;
+    const parsed = JSON.parse(jsonMatch[0]);
+
+    const triggers = loadTriggers();
+    triggers.unshift({
+      id:      Date.now(),
+      name:    parsed.name   || text.slice(0, 50),
+      action:  parsed.action || text,
+      freq:    ['daily','weekly','monthly'].includes(parsed.freq) ? parsed.freq : 'daily',
+      time:    /^\d{2}:\d{2}$/.test(parsed.time) ? parsed.time : '08:00',
+      weekday: parseInt(parsed.weekday) || 1,
+      day:     parseInt(parsed.day)     || 1,
+      enabled: true,
+      lastRun: null,
+    });
+    saveTriggersStore(triggers);
+    renderTriggers();
+
+    const confirmMsg = { role: 'assistant', content: `⚡ **Déclencheur créé** : "${parsed.name}" — ${parsed.freq === 'daily' ? 'quotidien' : parsed.freq === 'weekly' ? 'hebdomadaire' : 'mensuel'} à ${parsed.time}. Visible dans la section Déclencheurs & Workflows.` };
+    chatMessages.push(confirmMsg);
+    renderChatMessage(confirmMsg);
+  } catch { /* silently skip if parsing fails */ }
 }
 
 async function createTriggerFromChat() {

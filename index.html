@@ -321,27 +321,18 @@
 
     <!-- DÉCLENCHEURS & WORKFLOWS -->
     <div class="doc-lib-wrap" id="triggersWrap" style="margin-top:.75rem">
-      <div class="doc-lib-header" onclick="toggleTriggers()">
+      <div class="doc-lib-header" style="cursor:default">
         <div class="doc-lib-title">
           ⚡ Déclencheurs & Workflows
           <span class="doc-lib-count" id="triggersCount">0</span>
           <span style="font-size:.72rem;font-weight:400;color:var(--t500);margin-left:.5rem">— automatisez vos tâches récurrentes</span>
         </div>
-        <span class="doc-lib-toggle" id="triggersToggle">▼</span>
       </div>
       <div class="doc-lib-body" id="triggersBody">
-        <div id="triggersList" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.85rem"></div>
-        <p style="font-size:.8rem;color:var(--t400);margin:0 0 .65rem;line-height:1.5">
-          💬 Décrivez votre workflow en langage naturel — l'IA créera la règle automatiquement.
+        <div id="triggersList" style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:.5rem"></div>
+        <p style="font-size:.79rem;color:var(--t500);margin:0">
+          💬 Créez vos déclencheurs depuis l'<button onclick="switchPanel('chat')" style="background:none;border:none;color:var(--orange);cursor:pointer;font-size:.79rem;padding:0;text-decoration:underline">Assistant IA</button> — décrivez votre workflow en langage naturel.
         </p>
-        <div style="display:flex;gap:.55rem;align-items:flex-end">
-          <textarea id="triggerChatInput" class="form-textarea" rows="2"
-            placeholder="Ex : Tous les matins à 8h, génère un récapitulatif de mes emails et envoie-le sur Slack…"
-            style="flex:1;resize:none;min-height:48px;font-size:.83rem"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();createTriggerFromChat()}"></textarea>
-          <button class="btn btn-primary" onclick="createTriggerFromChat()" style="height:48px;padding:0 .9rem;flex-shrink:0" title="Créer le déclencheur">⚡</button>
-        </div>
-        <p style="font-size:.72rem;color:var(--t500);margin:.35rem 0 0">Shift+Entrée pour aller à la ligne · Entrée pour créer</p>
       </div>
     </div>
 
