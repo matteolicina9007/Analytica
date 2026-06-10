@@ -1398,11 +1398,10 @@ function renderTemplates() {
 }
 
 function toggleTemplates() {
-  const body    = document.getElementById('templatesBody');
-  const toggle  = document.getElementById('templatesToggle');
-  const isOpen  = body.style.display !== 'none';
-  body.style.display  = isOpen ? 'none' : '';
-  toggle.textContent  = isOpen ? '▶' : '▼';
+  const body   = document.getElementById('templatesBody');
+  const toggle = document.getElementById('templatesToggle');
+  body.classList.toggle('open');
+  toggle.textContent = body.classList.contains('open') ? '▼' : '▶';
 }
 
 // current file content stored while modal is open
