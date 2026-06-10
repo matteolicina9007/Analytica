@@ -1398,10 +1398,8 @@ function renderTemplates() {
 }
 
 function toggleTemplates() {
-  const body   = document.getElementById('templatesBody');
-  const toggle = document.getElementById('templatesToggle');
-  body.classList.toggle('open');
-  toggle.textContent = body.classList.contains('open') ? '▼' : '▶';
+  document.getElementById('templatesBody').classList.toggle('open');
+  document.getElementById('templatesToggle').classList.toggle('open');
 }
 
 // current file content stored while modal is open
@@ -1552,11 +1550,8 @@ function renderTriggers() {
 }
 
 function toggleTriggers() {
-  const body   = document.getElementById('triggersBody');
-  const toggle = document.getElementById('triggersToggle');
-  const isOpen = body.style.display !== 'none';
-  body.style.display = isOpen ? 'none' : '';
-  toggle.textContent = isOpen ? '▶' : '▼';
+  document.getElementById('triggersBody')?.classList.toggle('open');
+  document.getElementById('triggersToggle')?.classList.toggle('open');
 }
 
 function openTriggerModal() {
